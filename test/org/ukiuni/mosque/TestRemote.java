@@ -11,7 +11,7 @@ import org.ukiuni.pacifista.Remote.Shell;
 public class TestRemote {
 
 	private static final String HOST = "virtualhost";
-	private static final String USER_NAME = "usernane";
+	private static final String USER_NAME = "user";
 	private static final String PASSWORD = "password";
 	private static final String PROXY_HOST = "proxyHost";
 	private static final int PROXY_PORT = 1080;
@@ -20,20 +20,22 @@ public class TestRemote {
 	private static final String REMOTE_HOST = "proxyPassword";
 	private static final String REMOTE_USER = "remoteUser";
 	private static final String REMOTE_KEY_PASS = "remoteKeyPass";
+
 	@Test
 	public void testSendFile() throws IOException {
 		Remote remote = new Remote();
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File localFile = new File("testData/testFile.txt");
-		remote.sendFile(localFile, "./", localFile.getName());
+		remote.send(localFile, "./", localFile.getName());
 		remote.close();
 	}
+
 	@Test
 	public void testSendInDirFile() throws IOException {
 		Remote remote = new Remote();
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File localFile = new File("testData/sendDir/testFileInDir.txt");
-		remote.sendFile(localFile, "./forSendDirtest/sendDir", localFile.getName());
+		remote.send(localFile, "./forSendDirtest/sendDir", localFile.getName());
 		remote.close();
 	}
 
@@ -46,14 +48,15 @@ public class TestRemote {
 		remote.sendDirectory(localFile, "./forSendDirtest");
 		remote.close();
 	}
-	@Test
+
+	//@Test
 	public void testViaProxyUpload() throws IOException {
 		Remote remote = new Remote();
 		remote.setProxy(PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD);
 		remote.connect(REMOTE_HOST, 22, REMOTE_USER, new File(REMOTE_KEY_PASS));
 		File localFile = new File("testData/testFile.txt");
 
-		remote.sendFile(localFile, "./", localFile.getName());
+		remote.send(localFile, "./", localFile.getName());
 		remote.close();
 	}
 
@@ -70,13 +73,15 @@ public class TestRemote {
 		Remote remote = new Remote();
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		Shell shell = remote.startShell();
-		
+
 		System.out.println(shell.read());
-		
-		shell.write("ls --color=no");
+
+		shell.exec("ls --color=no");
 		System.out.println(shell.read());
-		shell.write("echo $?");
-		Assert.assertEquals("0", shell.read().trim());
+		shell.exec("echo $?");
+		byte[] buffer = new byte[2];
+		shell.read(buffer);
+		Assert.assertEquals("0", new String(buffer).trim());
 		// System.out.println("out-----|||");
 		// Assert.assertEquals("0", remote.execute("echo $?"));
 		shell.close();
@@ -89,7 +94,7 @@ public class TestRemote {
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File recieveDir = new File("/tmp");
 
-		remote.recieveFile("./testFile.txt", recieveDir);
+		remote.recieve("./testFile.txt", recieveDir);
 		remote.close();
 	}
 

@@ -110,7 +110,7 @@ public class Remote {
 		for (File file : files) {
 			String relativePath = file.getAbsolutePath().substring(localDirectoryPathLength).replace(File.separator, "/");
 			if (file.isFile()) {
-				sendFile(file, remoteDirectory, relativePath);
+				send(file, remoteDirectory, relativePath);
 			} else if (file.isDirectory()) {
 				execute("mkdir " + remoteDirectory + "/" + relativePath);
 				sendDirectory(file, remoteDirectory + "/" + relativePath);
@@ -118,11 +118,11 @@ public class Remote {
 		}
 	}
 
-	public void sendFile(File file, String remotePath, String remoteFileName) throws IOException {
+	public void send(File file, String remotePath, String remoteFileName) throws IOException {
 		FileInputStream fileIn = null;
 		try {
 			fileIn = new FileInputStream(file);
-			sendFile(fileIn, file.length(), remotePath, remoteFileName, null);
+			send(fileIn, file.length(), remotePath, remoteFileName, null);
 		} finally {
 			if (null != fileIn) {
 				fileIn.close();
@@ -141,9 +141,9 @@ public class Remote {
 	 *            file name
 	 * @throws IOException
 	 */
-	public void sendFile(String content, String remotePath, String remoteFileName) throws IOException {
+	public void send(String content, String remotePath, String remoteFileName) throws IOException {
 		byte[] contentBytes = content.getBytes();
-		sendFile(new ByteArrayInputStream(contentBytes), contentBytes.length, remotePath, remoteFileName, null);
+		send(new ByteArrayInputStream(contentBytes), contentBytes.length, remotePath, remoteFileName, null);
 	}
 
 	/**
@@ -159,12 +159,12 @@ public class Remote {
 	 *            mode
 	 * @throws IOException
 	 */
-	public void sendFile(String content, String remotePath, String remoteFileName, String mode) throws IOException {
+	public void send(String content, String remotePath, String remoteFileName, String mode) throws IOException {
 		byte[] contentBytes = content.getBytes();
-		sendFile(new ByteArrayInputStream(contentBytes), contentBytes.length, remotePath, remoteFileName, mode);
+		send(new ByteArrayInputStream(contentBytes), contentBytes.length, remotePath, remoteFileName, mode);
 	}
 
-	public void sendFile(InputStream fileIn, long fileSize, String remotePath, String remoteFileName, String mode) throws IOException {
+	public void send(InputStream fileIn, long fileSize, String remotePath, String remoteFileName, String mode) throws IOException {
 		String command = "scp  -t " + remotePath;
 		Channel channel = null;
 		try {
@@ -201,7 +201,11 @@ public class Remote {
 		}
 	}
 
-	public void recieveFile(String remoteFilePath, File outputDirectory) throws IOException {
+	public void recieve(String remoteFilePath, String outputDirectoryPath) throws IOException {
+		recieve(remoteFilePath, new File(outputDirectoryPath));
+	}
+
+	public void recieve(String remoteFilePath, File outputDirectory) throws IOException {
 		String command = "scp  -f " + remoteFilePath;
 		Channel channel = null;
 		try {
@@ -319,7 +323,7 @@ public class Remote {
 			}
 		}
 
-		public void write(String command) throws IOException {
+		public void exec(String command) throws IOException {
 			byte[] sendCommandBytes = (command + "\n").getBytes(encode);
 			this.out.write(sendCommandBytes);
 			this.out.write(new byte[1]);
@@ -331,6 +335,10 @@ public class Remote {
 				return;
 			}
 			throw new IOException("response bloken[" + response.replace("\r", "\\r").replace("\n", "\\n") + "] expect [" + (command + "\n").replace("\r", "\\r").replace("\n", "\\n") + "]");
+		}
+
+		public void read(byte[] buffer) throws IOException {
+			in.read(buffer);
 		}
 
 		public String read() throws IOException {

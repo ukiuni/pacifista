@@ -12,5 +12,6 @@ public class SampleScriptingExecutor {
 		ScriptingUtil.execScript(new File("."), "sampleScripts/setup.rb", new File("template"), null);
 		ScriptingUtil.execScript(new File("."), "sampleScripts/setup.js", new File("template"), null);
 		ScriptingUtil.execScript(new File("."), "sampleScripts/setup.groovy", new File("template"), null);
+		ScriptingUtil.execScript(new File("."), "sampleScripts/updateVersion.js", new File("template"), null);
 	}
 }

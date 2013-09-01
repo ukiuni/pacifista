@@ -40,7 +40,20 @@ public class Remote {
 			proxy.setUserPasswd(userName, password);
 		}
 		this.proxy = proxy;
+	}
 
+	public int loadVersion() throws IOException {
+		String value = this.execute("cat /usr/local/pacifista/version");
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	public void sendVersion(int version) throws IOException {
+		this.execute("sudo mkdir /usr/local/pacifista/");
+		this.execute("sudo sh -c \"echo \'" + version + "\' > /usr/local/pacifista/version\"");
 	}
 
 	public void connect(String host, int port, String account, File authFile) throws IOException {
@@ -270,10 +283,6 @@ public class Remote {
 		}
 	}
 
-	public String execute(String command) throws IOException {
-		return execute(command, null);
-	}
-
 	public Shell startShell() throws IOException {
 		try {
 			ChannelShell channel = (ChannelShell) this.session.openChannel("shell");
@@ -384,10 +393,15 @@ public class Remote {
 		}
 	}
 
+	public String execute(String command) throws IOException {
+		return execute(command, null);
+	}
+
 	public String execute(String command, MessageCallback messageCallback) throws IOException {
 		ChannelExec channel = null;
 		try {
 			channel = (ChannelExec) session.openChannel("exec");
+			channel.setPty(true);
 			channel.setCommand(command);
 			channel.connect();
 

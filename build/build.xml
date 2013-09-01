@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir=".." default="create_run_jar" name="Pacifista">
+    <property environment="env"/>
+    <property name="junit.output.dir" value="junit"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+	<property file="build/build.number"/>
+	<property name="version" value="${major.minor}.${next.build.number}"/>
+    <path id="Pacifista.classpath">
+        <pathelement location="compiled"/>
+        <pathelement location="libs/asm-4.0.jar"/>
+        <pathelement location="libs/groovy-all-2.1.6.jar"/>
+        <pathelement location="libs/jruby.jar"/>
+        <pathelement location="libs/jsch-0.1.50.jar"/>
+        <pathelement location="libs/velocity-1.7-dep.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="compiled"/>
+        <copy includeemptydirs="false" todir="compiled">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="compiled">
+            <fileset dir="test">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="compiled">
+            <fileset dir="template">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="compiled"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="compiled" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <src path="template"/>
+            <classpath refid="Pacifista.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="Main">
+        <java classname="org.ukiuni.pacifista.Main" failonerror="true" fork="yes">
+            <classpath refid="Pacifista.classpath"/>
+        </java>
+    </target>
+    <target name="TestRemote">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="org.ukiuni.mosque.TestRemote" todir="${junit.output.dir}"/>
+            <classpath refid="Pacifista.classpath"/>
+        </junit>
+    </target>
+    <target name="TestRemote.testShellSudoSu">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="org.ukiuni.mosque.TestRemote" todir="${junit.output.dir}"/>
+            <classpath refid="Pacifista.classpath"/>
+        </junit>
+    </target>
+    <target name="SampleScriptingExecutor">
+        <java classname="org.ukiuni.pacifista.sample.SampleScriptingExecutor" failonerror="true" fork="yes">
+            <classpath refid="Pacifista.classpath"/>
+        </java>
+    </target>
+    <target name="junitreport">
+        <junitreport todir="${junit.output.dir}">
+            <fileset dir="${junit.output.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${junit.output.dir}"/>
+        </junitreport>
+    </target>
+	<target depends="build-project,increment_build_number" name="create_run_jar">
+		<jar destfile="bin/pacifista.${version}.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="compiled" />
+			<fileset dir="src" />
+		</jar>
+	</target>
+	<target name="increment_build_number">
+		<propertyfile file="build/build.number" comment="Build Number for ANT. Edit not!">
+			<entry key="next.build.number" type="int" operation="+" default="1" />
+		</propertyfile>
+	</target>
+</project>

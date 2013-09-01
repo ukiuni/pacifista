@@ -3,8 +3,6 @@ package org.ukiuni.pacifista.velocity;
 import java.io.File;
 import java.io.StringWriter;
 
-import javax.naming.Context;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.ukiuni.pacifista.Template;

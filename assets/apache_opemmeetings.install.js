@@ -1,17 +1,18 @@
+var host = runtime.getEnv("host");
 var user = runtime.getEnv("user");
 var password = runtime.getEnv("password");
 var opUser = runtime.getEnv("opUser");
 var opPassword = runtime.getEnv("opPassword");
 console.log("called");
-if(null == user || null == password){
-	throw "user and password must be specified in parameter. like apache_openmeetings.insta..js?user=user&password=password";
+if(null == host || null == user || null == password){
+	throw "host, user and password must be specified in parameter. like apache_openmeetings.insta..js?user=user&password=password";
 }
 if(null == opUser || null == opPassword){
 	opUser = user;
 	password = opPassword;
 }
 var remote = Remote.create();
-remote.connect("virtualhost", 22, user, password);
+remote.connect(host, 22, user, password);
 remote.execute("sudo yum install -y \*java-1.6\*");
 remote.ecexute("mkdir apache-openmeetings");
 remote.ecexute("sudo yum install -y wget");

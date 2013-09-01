@@ -143,6 +143,19 @@ public class Remote {
 		}
 	}
 
+	public void sendFile(String filePath, String remotePath, String remoteFileName) throws IOException {	
+		File file = new File(filePath);
+		FileInputStream fileIn = null;
+		try {
+			fileIn = new FileInputStream(file);
+			send(fileIn, file.length(), remotePath, remoteFileName, null);
+		} finally {
+			if (null != fileIn) {
+				fileIn.close();
+			}
+		}
+	}
+
 	/**
 	 * send string as file
 	 * 

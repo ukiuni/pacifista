@@ -1,12 +1,14 @@
-package org.ukiuni.mosque;
+package org.ukiuni.pacifista;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.ukiuni.pacifista.Remote;
 import org.ukiuni.pacifista.Remote.Shell;
+import org.ukiuni.pacifista.util.ScriptingUtil;
+import org.ukiuni.pacifista.util.ScriptingUtil.LsResult;
 
 public class TestRemote {
 
@@ -49,7 +51,7 @@ public class TestRemote {
 		remote.close();
 	}
 
-	//@Test
+	// @Test
 	public void testViaProxyUpload() throws IOException {
 		Remote remote = new Remote();
 		remote.setProxy(PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD);
@@ -98,4 +100,10 @@ public class TestRemote {
 		remote.close();
 	}
 
+	@Test
+	public void testSendFileString() throws IOException {
+		Remote remote = new Remote();
+		remote.connect("virtualhost", 22, "user", "password");
+		remote.sendFile("data/zabbix.repo", "/tmp/", "zabbix.repo");
+	}
 }

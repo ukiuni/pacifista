@@ -29,6 +29,7 @@ public class Remote {
 	private ProxySOCKS5 proxy;
 	private Session session;
 	private String encode = "UTF-8";
+	private String host;
 
 	protected void setProxy(String host, int port) {
 		setProxy(host, port, null, null);
@@ -65,6 +66,7 @@ public class Remote {
 	}
 
 	private void connect(String host, int port, String account, final String password, File authFile) throws IOException {
+		this.host = host;
 		try {
 			Hashtable<String, String> config = new Hashtable<String, String>();
 			config.put("StrictHostKeyChecking", "no");
@@ -143,7 +145,7 @@ public class Remote {
 		}
 	}
 
-	public void sendFile(String filePath, String remotePath, String remoteFileName) throws IOException {	
+	public void sendFile(String filePath, String remotePath, String remoteFileName) throws IOException {
 		File file = new File(filePath);
 		FileInputStream fileIn = null;
 		try {
@@ -484,6 +486,10 @@ public class Remote {
 
 	public void setEncode(String encode) {
 		this.encode = encode;
+	}
+
+	public String getHost() {
+		return host;
 	}
 
 	public static interface MessageCallback {

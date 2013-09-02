@@ -9,7 +9,10 @@ template.put "parameter", templateparameter
 template.put "username", username
 template.put "lang", "Ruby";
 config = template.toValue;
-remote.send config, "forSendDirtest", "rubyConfig";
+remote.send config, "forSendDirtest", "rubyConfig"
+tester = $Tester.create remote
+tester.assertFile "/etc/hosts", "rw-r--r--", "root"
+tester.portOpen 22
 remote.close
 $runtime.call("sampleScripts/otherScript.js");
 puts "ruby complete"

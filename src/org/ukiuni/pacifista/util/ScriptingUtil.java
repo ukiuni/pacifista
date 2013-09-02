@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +19,7 @@ import javax.script.ScriptException;
 import org.ukiuni.pacifista.Console;
 import org.ukiuni.pacifista.RemoteFactory;
 import org.ukiuni.pacifista.Runtime;
+import org.ukiuni.pacifista.Tester;
 import org.ukiuni.pacifista.velocity.VelocityWrapper;
 
 public class ScriptingUtil {
@@ -50,6 +54,7 @@ public class ScriptingUtil {
 		scriptEngine.put("Template", new VelocityWrapper(templateDir));
 		scriptEngine.put("console", new Console());
 		scriptEngine.put("runtime", new Runtime(baseDir, templateDir, parameters));
+		scriptEngine.put("Tester", new Tester());
 		if (script.startsWith("http://") || script.startsWith("https://")) {
 			URL url = new URL(script);
 			URLConnection connection = url.openConnection();
@@ -77,5 +82,33 @@ public class ScriptingUtil {
 			}
 		}
 		return map;
+	}
+
+	public static LsResult parseLs(String lsResultString) throws ParseException {
+		String[] sprited = lsResultString.split(" ");
+		LsResult lsResult = new LsResult();
+		lsResult.isDir = sprited[0].startsWith("d");
+		lsResult.mode = sprited[0];
+		if (lsResult.mode.endsWith(".")) {
+			lsResult.mode = lsResult.mode.substring(1, lsResult.mode.length() - 1);
+		} else {
+			lsResult.mode = lsResult.mode.substring(1);
+		}
+		lsResult.group = sprited[2];
+		lsResult.owner = sprited[3];
+		lsResult.size = Long.parseLong(sprited[4]);
+		lsResult.date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(sprited[5] + " " + sprited[6]);
+		lsResult.name = sprited[7];
+		return lsResult;
+	}
+
+	public static class LsResult {
+		public boolean isDir;
+		public String mode;
+		public String group;
+		public String owner;
+		public Date date;
+		public long size;
+		public String name;
 	}
 }

@@ -12,7 +12,12 @@ config = template.toValue;
 remote.send config, "forSendDirtest", "rubyConfig"
 tester = $Tester.create remote
 tester.assertFile "/etc/hosts", "rw-r--r--", "root"
-tester.portOpen 22
+tester.assertPortOpen 22
+tester.assertCommand "hostname", "localhost.localdomain"
+tester.assertFileHasLine "forSendDirtest/rubyConfig", "by lang[Ruby]"
+tester.assertFileIsFile "forSendDirtest/groovyConfig"
+tester.assertFileIsDirectory "forSendDirtest"
+tester.assertUserExists "user"
 remote.close
-$runtime.call("sampleScripts/otherScript.js");
+$runtime.call "sampleScripts/otherScript.js"
 puts "ruby complete"

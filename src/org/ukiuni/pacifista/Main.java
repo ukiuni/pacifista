@@ -17,13 +17,17 @@ public class Main {
 		}
 		File baseDir = new File(baseDirPath);
 		File templateDir = new File(baseDir, "template");
-		if (args.length > 2) {
-			for (int i = 2; i < args.length; i++) {
-				ScriptingUtil.execScript(baseDir, args[i], templateDir, null);
+		try {
+			if (args.length > 2) {
+				for (int i = 2; i < args.length; i++) {
+					ScriptingUtil.execScript(baseDir, args[i], templateDir, null);
+				}
+			} else {
+				File scriptDir = new File(baseDir, "scripts");
+				ScriptingUtil.execFolder(scriptDir, templateDir, null);
 			}
-		} else {
-			File scriptDir = new File(baseDir, "scripts");
-			ScriptingUtil.execFolder(scriptDir, templateDir, null);
+		} finally {
+			RemoteFactory.closeAll();
 		}
 	}
 }

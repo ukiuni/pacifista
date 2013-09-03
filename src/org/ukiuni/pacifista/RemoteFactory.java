@@ -1,9 +1,23 @@
 package org.ukiuni.pacifista;
 
-import org.ukiuni.pacifista.Remote;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RemoteFactory {
+	private static List<Remote> remotes = new ArrayList<Remote>();
+
 	public Remote create() {
-		return new Remote();
+		Remote remote = new Remote();
+		remotes.add(remote);
+		return remote;
+	}
+
+	public static void closeAll() {
+		for (Remote remote : remotes) {
+			try {
+				remote.close();
+			} catch (Throwable e) {
+			}
+		}
 	}
 }

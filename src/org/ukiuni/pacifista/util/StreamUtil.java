@@ -91,10 +91,11 @@ public class StreamUtil {
 		private InputStream in;
 		private EventHandler handler;
 
-		public CopyWorker(InputStream in, OutputStream out, EventHandler handler) {
+		public CopyWorker(InputStream in, OutputStream out, EventHandler handler, boolean daemon) {
 			this.in = in;
 			this.out = out;
 			this.handler = handler;
+			this.setDaemon(true);
 		}
 
 		@Override

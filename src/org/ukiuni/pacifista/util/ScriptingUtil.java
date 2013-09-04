@@ -8,8 +8,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptEngine;
@@ -17,15 +21,39 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.ukiuni.pacifista.Console;
+import org.ukiuni.pacifista.Git;
+import org.ukiuni.pacifista.Local;
 import org.ukiuni.pacifista.RemoteFactory;
 import org.ukiuni.pacifista.Runtime;
 import org.ukiuni.pacifista.Tester;
 import org.ukiuni.pacifista.velocity.VelocityWrapper;
 
 public class ScriptingUtil {
-	public static void execFolder(File target, File templateDir, Map<String, String> parameters) throws ScriptException, IOException {
+	public static void execFolder(File target, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
 		File[] childlen = target.listFiles();
+		List<File> sortedList = new ArrayList<File>();
 		for (File file : childlen) {
+			sortedList.add(file);
+		}
+		Collections.sort(sortedList, new Comparator<File>() {
+			@Override
+			public int compare(File f1, File f2) {
+				if (f1.isDirectory()) {
+					if (f2.isDirectory()) {
+						return f1.compareTo(f2);
+					} else {
+						return 1;
+					}
+				} else {
+					if (f2.isDirectory()) {
+						return -1;
+					} else {
+						return f1.compareTo(f2);
+					}
+				}
+			}
+		});
+		for (File file : sortedList) {
 			if (file.isDirectory()) {
 				execFolder(file, templateDir, parameters);
 			} else if (file.isFile()) {
@@ -34,7 +62,7 @@ public class ScriptingUtil {
 		}
 	}
 
-	public static void execScript(File baseDir, String script, File templateDir, Map<String, String> parameters) throws ScriptException, IOException {
+	public static void execScript(File baseDir, String script, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
 		if (script.endsWith(".js")) {
 			execScript("JavaScript", baseDir, script, templateDir, parameters);
 		} else if (script.endsWith(".rb")) {
@@ -44,9 +72,9 @@ public class ScriptingUtil {
 		}
 	}
 
-	public static void execScript(String lang, File baseDir, String script, File templateDir, Map<String, String> parameters) throws ScriptException, IOException {
+	public static void execScript(String lang, File baseDir, String script, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
 		if (null == parameters) {
-			parameters = new HashMap<String, String>();
+			parameters = new HashMap<String, Object>();
 		}
 		ScriptEngineManager scriptManager = new ScriptEngineManager();
 		ScriptEngine scriptEngine = scriptManager.getEngineByName(lang);
@@ -55,6 +83,8 @@ public class ScriptingUtil {
 		scriptEngine.put("console", new Console());
 		scriptEngine.put("runtime", new Runtime(baseDir, templateDir, parameters));
 		scriptEngine.put("Tester", new Tester());
+		scriptEngine.put("local", new Local(baseDir));
+		scriptEngine.put("git", new Git(baseDir));
 		if (script.startsWith("http://") || script.startsWith("https://")) {
 			URL url = new URL(script);
 			URLConnection connection = url.openConnection();

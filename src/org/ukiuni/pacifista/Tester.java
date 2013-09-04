@@ -27,6 +27,15 @@ public class Tester {
 		return new Tester(remote);
 	}
 
+	public void assertEquals(Object arg1, Object arg2) {
+		if (null == arg1 && null == arg2) {
+			return;
+		}
+		if (!arg1.equals(arg2)) {
+			throw new AssertionError("[" + arg1 + "] != [" + arg2 + "]");
+		}
+	}
+
 	public void assertFile(String path, String mode) throws IOException, AssertionError {
 		assertFile(path, mode, null, null, null);
 	}

@@ -18,6 +18,12 @@ tester.assertFileHasLine "forSendDirtest/rubyConfig", "by lang[Ruby]"
 tester.assertFileIsFile "forSendDirtest/groovyConfig"
 tester.assertFileIsDirectory "forSendDirtest"
 tester.assertUserExists "user"
+$local.mkdir "data/test/localCreatedDir_ruby"
+$local.save "data/test/localCreatedDir_ruby/saved.txt", "this is\nPacifista!!"
+$local.copy "data/test/localCreatedDir_ruby/saved.txt", "data/test/localCreatedDir_ruby/copyed.txt"
+tester.assertEquals "this is\nPacifista!!", ($local.load "data/test/localCreatedDir_ruby/saved.txt")
+$git.clone "https://github.com/ukiuni/pacifista.git", "data/test/gitDir"
+$local.remove "data/test"
 remote.close
 $runtime.call "sampleScripts/otherScript.js"
 puts "ruby complete"

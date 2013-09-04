@@ -10,17 +10,17 @@ import javax.script.ScriptException;
 import org.ukiuni.pacifista.util.ScriptingUtil;
 
 public class Runtime {
-	private Map<String, String> dataMap = new HashMap<String, String>();
+	private Map<String, Object> dataMap = new HashMap<String, Object>();
 	private final File templateDir;
 	private File baseDir;
 
-	public Runtime(File baseDir, File templateDir, Map<String, String> dataMap) {
+	public Runtime(File baseDir, File templateDir, Map<String, Object> dataMap) {
 		this.baseDir = baseDir;
 		this.templateDir = templateDir;
 		this.dataMap = dataMap;
 	}
 
-	public String getEnv(String key) {
+	public Object getEnv(String key) {
 		if (dataMap.containsKey(key)) {
 			return dataMap.get(key);
 		}
@@ -31,7 +31,7 @@ public class Runtime {
 		dataMap.put(key, value);
 	}
 
-	public String get_env(String key) {
+	public Object get_env(String key) {
 		return getEnv(key);
 	}
 
@@ -40,7 +40,7 @@ public class Runtime {
 	}
 
 	public void call(String script) throws ScriptException, IOException {
-		Map<String, String> hashMap = new HashMap<String, String>(this.dataMap);
+		Map<String, Object> hashMap = new HashMap<String, Object>(this.dataMap);
 		if (script.contains("?")) {
 			hashMap.putAll(ScriptingUtil.pickupParameters(script));
 			script = script.substring(0, script.indexOf("?"));

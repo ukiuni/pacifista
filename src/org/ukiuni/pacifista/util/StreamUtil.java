@@ -1,5 +1,6 @@
 package org.ukiuni.pacifista.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -150,5 +151,12 @@ public class StreamUtil {
 		public static interface EventHandler {
 			public void onRead(int in);
 		}
+	}
+
+	public static String inputToString(InputStream in) throws IOException {
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		IOUtil.copy(in, bout);
+		bout.close();
+		return new String(bout.toByteArray());
 	}
 }

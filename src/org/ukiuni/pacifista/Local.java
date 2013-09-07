@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.ukiuni.pacifista.util.IOUtil;
+import org.ukiuni.pacifista.util.StreamUtil;
 
 public class Local {
 	private final File baseDir;
@@ -69,5 +70,64 @@ public class Local {
 		in.read(buffer);
 		in.close();
 		return new String(buffer, encode);
+	}
+
+	public static String execute(String command) throws IOException, InterruptedException {
+		return execute(command.split(" "));
+	}
+
+	public static String execute(String[] command) throws IOException, InterruptedException {
+		Process process = java.lang.Runtime.getRuntime().exec(command);
+		int returnCode = process.waitFor();
+		if (0 != returnCode) {
+			throw new RuntimeException(concat(command, " ") + " failed returnCode = " + returnCode + ", " + StreamUtil.inputToString(process.getErrorStream()));
+		}
+		String returnMessage = StreamUtil.inputToString(process.getInputStream());
+		process.destroy();
+		return returnMessage;
+	}
+
+	public static Process executeNowait(String command) throws IOException, InterruptedException {
+		return java.lang.Runtime.getRuntime().exec(command.split(" "));
+	}
+
+	public static Process executeNowait(String[] command) throws IOException, InterruptedException {
+		return java.lang.Runtime.getRuntime().exec(command);
+	}
+
+	private static String concat(String[] args, String bond) {
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < args.length; i++) {
+			buffer.append(args[i]);
+			if (args.length - 1 != i) {
+				buffer.append(bond);
+			}
+		}
+		return buffer.toString();
+	}
+
+	public void sleep(long wait) throws InterruptedException {
+		Thread.sleep(wait);
+	}
+
+	public static String find(String path, String fileName) {
+		return find(new File(path), fileName);
+	}
+
+	public static String find(File file, String fileName) {
+		if (file.isFile()) {
+			if (file.getName().equals(fileName)) {
+				return file.getAbsolutePath();
+			}
+		} else if (file.isDirectory()) {
+			File[] children = file.listFiles();
+			for (File child : children) {
+				String result = find(child, fileName);
+				if (null != result) {
+					return result;
+				}
+			}
+		}
+		return null;
 	}
 }

@@ -9,6 +9,8 @@
 	<classpathentry kind="lib" path="libs/jsch-0.1.50.jar"/>
 	<classpathentry kind="lib" path="libs/velocity-1.7-dep.jar"/>
 	<classpathentry kind="lib" path="libs/org.eclipse.jgit-3.0.0.201306101825-r.jar"/>
+	<classpathentry kind="lib" path="libs/commons-compress-1.5.jar"/>
+	<classpathentry kind="lib" path="libs/commons-codec-1.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="compiled"/>
 </classpath>

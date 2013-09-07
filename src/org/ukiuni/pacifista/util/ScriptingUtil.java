@@ -27,6 +27,7 @@ import org.ukiuni.pacifista.RemoteFactory;
 import org.ukiuni.pacifista.Runtime;
 import org.ukiuni.pacifista.Tester;
 import org.ukiuni.pacifista.velocity.VelocityWrapper;
+import org.ukiuni.pacifista.virtual.VirtualMacine;
 
 public class ScriptingUtil {
 	public static void execFolder(File target, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
@@ -85,6 +86,7 @@ public class ScriptingUtil {
 		scriptEngine.put("Tester", new Tester());
 		scriptEngine.put("local", new Local(baseDir));
 		scriptEngine.put("git", new Git(baseDir));
+		scriptEngine.put("VirtualMacine", new VirtualMacine(baseDir));
 		if (script.startsWith("http://") || script.startsWith("https://")) {
 			URL url = new URL(script);
 			URLConnection connection = url.openConnection();

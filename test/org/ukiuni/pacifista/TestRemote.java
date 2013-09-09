@@ -22,7 +22,7 @@ public class TestRemote {
 
 	@Test
 	public void testSendFile() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File localFile = new File("testData/testFile.txt");
 		remote.send(localFile, "./", localFile.getName());
@@ -31,7 +31,7 @@ public class TestRemote {
 
 	@Test
 	public void testSendInDirFile() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File localFile = new File("testData/sendDir/testFileInDir.txt");
 		remote.send(localFile, "./forSendDirtest/sendDir", localFile.getName());
@@ -40,7 +40,7 @@ public class TestRemote {
 
 	@Test
 	public void testSendDir() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File localFile = new File("data");
 		remote.execute("mkdir forSendDirtest");
@@ -50,7 +50,7 @@ public class TestRemote {
 
 	// @Test
 	public void testViaProxyUpload() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.setProxy(PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD);
 		remote.connect(REMOTE_HOST, 22, REMOTE_USER, new File(REMOTE_KEY_PASS));
 		File localFile = new File("testData/testFile.txt");
@@ -61,7 +61,7 @@ public class TestRemote {
 
 	@Test
 	public void testExecuteEcho() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		Assert.assertEquals("this is a test", remote.execute("echo \'this is a test\'"));
 		remote.close();
@@ -69,7 +69,7 @@ public class TestRemote {
 
 	@Test
 	public void testShellSudoSu() throws IOException, InterruptedException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		Shell shell = remote.startShell();
 
@@ -89,7 +89,7 @@ public class TestRemote {
 
 	@Test
 	public void testDownloadFile() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect(HOST, 22, USER_NAME, PASSWORD);
 		File recieveDir = new File("/tmp");
 
@@ -99,7 +99,7 @@ public class TestRemote {
 
 	@Test
 	public void testSendFileString() throws IOException {
-		Remote remote = new Remote();
+		Remote remote = new Remote(new File("."));
 		remote.connect("virtualhost", 22, "user", "password");
 		remote.sendFile("data/zabbix.repo", "/tmp/", "zabbix.repo");
 	}

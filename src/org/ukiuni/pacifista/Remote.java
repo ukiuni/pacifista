@@ -26,10 +26,15 @@ import com.jcraft.jsch.UserInfo;
 
 @SuppressWarnings("serial")
 public class Remote {
+	private File baseDir;
 	private ProxySOCKS5 proxy;
 	private Session session;
 	private String encode = "UTF-8";
 	private String host;
+
+	public Remote(File baseDir) {
+		this.baseDir = baseDir;
+	}
 
 	protected void setProxy(String host, int port) {
 		setProxy(host, port, null, null);
@@ -66,7 +71,7 @@ public class Remote {
 	}
 
 	public void connectWithAuthFile(String host, int port, String account, String authFilePath) throws IOException {
-		this.connect(host, port, account, null, new File(authFilePath));
+		this.connect(host, port, account, null, new File(baseDir, authFilePath));
 	}
 
 	public void connect(String host, int port, String account, final String password, File authFile) throws IOException {
@@ -154,7 +159,7 @@ public class Remote {
 	}
 
 	public void sendFile(String filePath, String remotePath, String remoteFileName) throws IOException {
-		File file = new File(filePath);
+		File file = new File(baseDir, filePath);
 		FileInputStream fileIn = null;
 		try {
 			fileIn = new FileInputStream(file);

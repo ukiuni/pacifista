@@ -100,7 +100,7 @@ public class ScriptingUtil {
 		}
 		ScriptEngineManager scriptManager = new ScriptEngineManager();
 		ScriptEngine scriptEngine = scriptManager.getEngineByName(lang);
-		scriptEngine.put("Remote", new RemoteFactory());
+		scriptEngine.put("Remote", new RemoteFactory(baseDir));
 		scriptEngine.put("Template", new VelocityWrapper(templateDir));
 		scriptEngine.put("console", new Console());
 		scriptEngine.put("runtime", new Runtime(baseDir, templateDir, parameters));

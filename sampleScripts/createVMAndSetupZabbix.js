@@ -6,6 +6,7 @@ if(host.isExist()){
 	}
 	host.remove();
 }
+console.log("download Vagrant box. it may cost some minute.");
 var virtualImage = host.downloadImage("https://dl.dropbox.com/u/7225008/Vagrant/CentOS-6.3-x86_64-minimal.box");
 var sshPort = host.create(virtualImage);// set image absolute path
 host.boot();
@@ -14,12 +15,13 @@ while(true){
 	try{
 		remote.connect("localhost", sshPort, "vagrant", "vagrant");
 		break;
-	}catch(e){
-		runtime.sleep(3000);
-		console.log(".");
+	} catch (e){
+		console.log("waiting for vm up.");
+		runtime.sleep(1000);
 	}
 }
-console.log(remote.execute("ls -al"));
-//host.shutdown();
-//host.remove();
-//local.remove("vmimages/"+hostName);
+console.log("vm is now up.");
+runtime.setEnv("remote", remote);
+runtime.setEnv("host", "vagranthost");
+runtime.setEnv("zabbixServer", "zabbixServer");
+runtime.call("./assets/install_zabbix-agent_to_linux.js");

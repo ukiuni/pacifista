@@ -27,7 +27,7 @@ public class Runtime {
 		return System.getenv(key);
 	}
 
-	public void setEnv(String key, String value) {
+	public void setEnv(String key, Object value) {
 		dataMap.put(key, value);
 	}
 
@@ -46,5 +46,9 @@ public class Runtime {
 			script = script.substring(0, script.indexOf("?"));
 		}
 		ScriptingUtil.execScript(this.baseDir, script, this.templateDir, hashMap);
+	}
+
+	public void sleep(long wait) throws InterruptedException {
+		Thread.sleep(wait);
 	}
 }

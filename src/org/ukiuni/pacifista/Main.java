@@ -24,7 +24,7 @@ public class Main {
 				}
 			} else {
 				File scriptDir = new File(baseDir, "scripts");
-				ScriptingUtil.execFolder(scriptDir, templateDir, null);
+				ScriptingUtil.execFolder(baseDir, scriptDir, templateDir, null);
 			}
 		} finally {
 			RemoteFactory.closeAll();

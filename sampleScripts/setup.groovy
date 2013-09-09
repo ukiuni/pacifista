@@ -1,5 +1,6 @@
 def remote = Remote.create();
 remote.connect("virtualhost", 22, "user", "password");
+//or remote.connectWithAuthFile("localhost", 28279, "vagrant", "/home/user/.ssh/pacifista");
 remote.execute("mkdir forSendDirtest");
 remote.execute("touch forSendDirtest/groovy.pacifista.txt");
 def templateparameter = "replaced value";
@@ -22,6 +23,7 @@ local.mkdir("data/test/localCreatedDir_groovy");
 local.save("data/test/localCreatedDir_groovy/saved.txt", "this is\nPacifista!!");
 local.copy("data/test/localCreatedDir_groovy/saved.txt", "data/test/localCreatedDir_groovy/copyed.txt");
 tester.assertEquals("this is\nPacifista!!", local.load("data/test/localCreatedDir_groovy/saved.txt"));
+local.remove("data/test/gitDir");
 git.clone("https://github.com/ukiuni/pacifista.git", "data/test/gitDir");
 local.remove("data/test");
 remote.close();

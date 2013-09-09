@@ -1,6 +1,7 @@
 package org.ukiuni.pacifista.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,7 +31,10 @@ import org.ukiuni.pacifista.velocity.VelocityWrapper;
 import org.ukiuni.pacifista.virtual.VirtualMacine;
 
 public class ScriptingUtil {
-	public static void execFolder(File target, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execFolder(File baseDir, File target, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
+		if (!target.exists()) {
+			throw new FileNotFoundException(target.getAbsolutePath());
+		}
 		File[] childlen = target.listFiles();
 		List<File> sortedList = new ArrayList<File>();
 		for (File file : childlen) {
@@ -56,11 +60,28 @@ public class ScriptingUtil {
 		});
 		for (File file : sortedList) {
 			if (file.isDirectory()) {
-				execFolder(file, templateDir, parameters);
+				execFolder(baseDir, file, templateDir, parameters);
 			} else if (file.isFile()) {
-				execScript(file.getParentFile(), file.getName(), templateDir, parameters);
+				String canonical = picupCanonical(baseDir, file);
+				execScript(baseDir, canonical, templateDir, parameters);
 			}
 		}
+	}
+
+	public static String picupCanonical(File baseDir, File file) {
+		String baseAbsolute = baseDir.getAbsolutePath();
+		String fileAbsolute = file.getAbsolutePath();
+		int compaireToLength = baseAbsolute.length() < fileAbsolute.length() ? baseAbsolute.length() : fileAbsolute.length();
+		String canonical = null;
+		for (int i = 0; i <= compaireToLength; i++) {
+			if (!baseAbsolute.startsWith(fileAbsolute.substring(0, i))) {
+				break;
+			}
+		}
+		if (null == canonical) {
+			canonical = fileAbsolute.substring(baseAbsolute.length() - 1);
+		}
+		return canonical;
 	}
 
 	public static void execScript(File baseDir, String script, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
@@ -103,34 +124,58 @@ public class ScriptingUtil {
 		Map<String, String> map = new HashMap<String, String>();
 		if (url.contains("?")) {
 			String query = url.substring(url.indexOf("?") + 1);
-			String[] parameterSets = query.split("&");
-			for (int i = 0; i < parameterSets.length; i++) {
-				int questIndex = parameterSets[i].indexOf("=");
-				if (questIndex > 0) {
-					String key = parameterSets[i].substring(0, questIndex);
-					String value = parameterSets[i].substring(questIndex + 1);
-					map.put(key, value);
-				}
+			parseParameters(map, query);
+		}
+		return map;
+	}
+
+	public static void parseParameters(Map<String, String> map, String query) {
+		String[] parameterSets = query.split("&");
+		for (int i = 0; i < parameterSets.length; i++) {
+			int questIndex = parameterSets[i].indexOf("=");
+			if (questIndex > 0) {
+				String key = parameterSets[i].substring(0, questIndex);
+				String value = parameterSets[i].substring(questIndex + 1);
+				map.put(key, value);
+			}
+		}
+	}
+
+	public static Map<String, String> parseParameters(String query) {
+		Map<String, String> map = new HashMap<String, String>();
+
+		String[] parameterSets = query.split("&");
+		for (int i = 0; i < parameterSets.length; i++) {
+			int questIndex = parameterSets[i].indexOf("=");
+			if (questIndex > 0) {
+				String key = parameterSets[i].substring(0, questIndex);
+				String value = parameterSets[i].substring(questIndex + 1);
+				map.put(key, value);
 			}
 		}
 		return map;
 	}
 
 	public static LsResult parseLs(String lsResultString) throws ParseException {
-		String[] sprited = lsResultString.split(" ");
-		LsResult lsResult = new LsResult();
-		lsResult.isDir = sprited[0].startsWith("d");
-		lsResult.mode = sprited[0];
-		if (lsResult.mode.endsWith(".")) {
-			lsResult.mode = lsResult.mode.substring(1, lsResult.mode.length() - 1);
-		} else {
-			lsResult.mode = lsResult.mode.substring(1);
+		LsResult lsResult;
+		try {
+			String[] sprited = lsResultString.split(" ");
+			lsResult = new LsResult();
+			lsResult.isDir = sprited[0].startsWith("d");
+			lsResult.mode = sprited[0];
+			if (lsResult.mode.endsWith(".")) {
+				lsResult.mode = lsResult.mode.substring(1, lsResult.mode.length() - 1);
+			} else {
+				lsResult.mode = lsResult.mode.substring(1);
+			}
+			lsResult.group = sprited[2];
+			lsResult.owner = sprited[3];
+			lsResult.size = Long.parseLong(sprited[4]);
+			lsResult.date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(sprited[5] + " " + sprited[6]);
+			lsResult.name = sprited[7];
+		} catch (Throwable e) {
+			throw new RuntimeException("ls String [" + lsResultString + "] is not parseable.", e);
 		}
-		lsResult.group = sprited[2];
-		lsResult.owner = sprited[3];
-		lsResult.size = Long.parseLong(sprited[4]);
-		lsResult.date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(sprited[5] + " " + sprited[6]);
-		lsResult.name = sprited[7];
 		return lsResult;
 	}
 

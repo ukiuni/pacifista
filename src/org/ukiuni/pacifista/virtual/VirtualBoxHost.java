@@ -23,6 +23,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.ukiuni.pacifista.Local;
 import org.ukiuni.pacifista.util.IOUtil;
+import org.ukiuni.pacifista.util.ScriptingUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
 
 public class VirtualBoxHost {
@@ -30,18 +31,19 @@ public class VirtualBoxHost {
 	private String host;
 	private File baseDir;
 	private static final int READ_BUFFER_SIZE = 1024;
+	private Map<String, String> parameterMap = new HashMap<String, String>();
 
 	public VirtualBoxHost(String host, File baseDir) {
 		this.host = host;
 		this.baseDir = baseDir;
 	}
 
-	public void boot(String parameters) throws IOException, InterruptedException {
-		Local.executeNowait(new String[] { "VBoxHeadless", "-startvm", host });
+	public void setParameters(String parameters) {
+		ScriptingUtil.parseParameters(parameterMap, parameters);
 	}
 
 	public void boot() throws IOException, InterruptedException {
-		boot(null);
+		Local.executeNowait(new String[] { "VBoxHeadless", "-startvm", host });
 	}
 
 	public void shutdown() throws IOException, InterruptedException {

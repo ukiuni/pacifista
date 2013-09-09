@@ -106,10 +106,6 @@ public class Local {
 		return buffer.toString();
 	}
 
-	public void sleep(long wait) throws InterruptedException {
-		Thread.sleep(wait);
-	}
-
 	public static String find(String path, String fileName) {
 		return find(new File(path), fileName);
 	}

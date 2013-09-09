@@ -65,7 +65,11 @@ public class Remote {
 		this.connect(host, port, account, password, null);
 	}
 
-	private void connect(String host, int port, String account, final String password, File authFile) throws IOException {
+	public void connectWithAuthFile(String host, int port, String account, String authFilePath) throws IOException {
+		this.connect(host, port, account, null, new File(authFilePath));
+	}
+
+	public void connect(String host, int port, String account, final String password, File authFile) throws IOException {
 		this.host = host;
 		try {
 			Hashtable<String, String> config = new Hashtable<String, String>();
@@ -110,6 +114,10 @@ public class Remote {
 		} catch (JSchException e) {
 			throw new IOException(e);
 		}
+	}
+
+	public boolean isConnected() {
+		return null != this.session && this.session.isConnected();
 	}
 
 	public void sendDirectory(File localDirectory, String remoteDirectory) throws IOException {

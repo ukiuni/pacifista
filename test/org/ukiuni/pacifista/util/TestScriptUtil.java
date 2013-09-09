@@ -1,7 +1,7 @@
 package org.ukiuni.pacifista.util;
 
+import java.io.File;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -52,5 +52,12 @@ public class TestScriptUtil {
 		Assert.assertEquals(22, lsResult.date.getMinutes());
 		Assert.assertEquals(06, lsResult.date.getSeconds());
 		Assert.assertEquals("/etc/", lsResult.name);
+	}
+	@Test
+	public void testPickupCanonical(){
+		File baseDir = new File(".");
+		File file = new File("test/org");
+		String canonical = ScriptingUtil.picupCanonical(baseDir, file);
+		Assert.assertEquals("test/org", canonical);
 	}
 }

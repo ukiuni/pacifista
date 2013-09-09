@@ -16,11 +16,11 @@ while(true){
 		remote.connect("localhost", sshPort, "vagrant", "vagrant");
 		break;
 	}catch(e){
-		local.sleep(3000);
+		runtime.sleep(3000);
 		console.log(".");
 	}
 }
 console.log(remote.execute("ls -al"));
-host.shutdown();
-host.remove();
-local.remove("vmimages/"+hostName);
+//host.shutdown();
+//host.remove();
+//local.remove("vmimages/"+hostName);

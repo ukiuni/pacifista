@@ -2,13 +2,10 @@ package org.ukiuni.pacifista;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.ukiuni.pacifista.Remote.Shell;
-import org.ukiuni.pacifista.util.ScriptingUtil;
-import org.ukiuni.pacifista.util.ScriptingUtil.LsResult;
 
 public class TestRemote {
 

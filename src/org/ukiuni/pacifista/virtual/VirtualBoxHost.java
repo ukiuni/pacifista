@@ -26,30 +26,55 @@ import org.ukiuni.pacifista.util.IOUtil;
 import org.ukiuni.pacifista.util.ScriptingUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
 
-public class VirtualBoxHost {
+public class VirtualBoxHost implements VirtualHost {
 
 	private String host;
 	private File baseDir;
 	private static final int READ_BUFFER_SIZE = 1024;
 	private Map<String, String> parameterMap = new HashMap<String, String>();
 
-	public VirtualBoxHost(String host, File baseDir) {
-		this.host = host;
+	public VirtualBoxHost(File baseDir, String host) {
 		this.baseDir = baseDir;
+		this.host = host;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.ukiuni.pacifista.virtual.VirtualHost#setParameters(java.lang.String)
+	 */
+	@Override
 	public void setParameters(String parameters) {
 		ScriptingUtil.parseParameters(parameterMap, parameters);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#boot()
+	 */
+	@Override
 	public void boot() throws IOException, InterruptedException {
 		Local.executeNowait(new String[] { "VBoxHeadless", "-startvm", host });
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#shutdown()
+	 */
+	@Override
 	public void shutdown() throws IOException, InterruptedException {
 		Local.execute(new String[] { "VBoxManage", "controlvm", host, "poweroff" });
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#isRunning()
+	 */
+	@Override
 	public boolean isRunning() throws IOException, InterruptedException {
 		String result = Local.execute(new String[] { "VBoxManage", "list", "runningvms" });
 		if (result.contains("\"" + host + "\"")) {
@@ -58,6 +83,12 @@ public class VirtualBoxHost {
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#isExist()
+	 */
+	@Override
 	public boolean isExist() throws IOException, InterruptedException {
 		try {
 			Local.execute(new String[] { "VBoxManage", "showvminfo", host });
@@ -67,14 +98,37 @@ public class VirtualBoxHost {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.ukiuni.pacifista.virtual.VirtualHost#downloadImage(java.lang.String)
+	 */
+	@Override
 	public String downloadImage(String url) throws IOException {
 		return downloadImage(url, null, 0);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.ukiuni.pacifista.virtual.VirtualHost#downloadImage(java.lang.String,
+	 * java.lang.String, int)
+	 */
+	@Override
 	public String downloadImage(String url, String proxyHost, int proxyPort) throws IOException {
 		return downloadImage(url, null, 0, null, null);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.ukiuni.pacifista.virtual.VirtualHost#downloadImage(java.lang.String,
+	 * java.lang.String, int, java.lang.String, java.lang.String)
+	 */
+	@Override
 	public String downloadImage(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
 		InputStream in;
 		if (null == proxyHost) {
@@ -128,13 +182,26 @@ public class VirtualBoxHost {
 		}
 	}
 
-	public int create(String stragePath) throws IOException, InterruptedException {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#create(java.lang.String)
+	 */
+	@Override
+	public InstanceSSHAddress create(String stragePath) throws IOException, InterruptedException {
 		int port = new Random().nextInt(65535);
-		create(stragePath, "RedHat_64", "512", String.valueOf(port));
-		return port;
+		create(stragePath, "RedHat_64", "512", port);
+		return new InstanceSSHAddress("localhost", port, null);
 	}
 
-	public void create(String stragePath, String type, String memory, String port) throws IOException, InterruptedException {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#create(java.lang.String,
+	 * java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public InstanceSSHAddress create(String stragePath, String type, String memory, int port) throws IOException, InterruptedException {
 		String returnValue = Local.execute(new String[] { "VBoxManage", "createvm", "--name", host, "--ostype", type });
 
 		BufferedReader reader = new BufferedReader(new StringReader(returnValue));
@@ -163,6 +230,7 @@ public class VirtualBoxHost {
 				Local.execute(new String[] { "VBoxManage", "modifyvm", host, "--macaddress1", param.get("config.vm.base_mac").replace("\"", "") });
 			}
 		}
+		return new InstanceSSHAddress("localhost", port, null);
 	}
 
 	private Map<String, String> loadVagrantSetting(String vagrantSettingFilePath) throws IOException {
@@ -180,6 +248,12 @@ public class VirtualBoxHost {
 		return param;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ukiuni.pacifista.virtual.VirtualHost#remove()
+	 */
+	@Override
 	public void remove() throws IOException, InterruptedException {
 		Process process = Runtime.getRuntime().exec(new String[] { "VBoxManage", "unregistervm", host, "--delete" });
 		int returnCode = process.waitFor();

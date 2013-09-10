@@ -1,4 +1,4 @@
 Pacifista is licensed under Apache License 2.0.
 
-This software depends on jruby(CPL), groovy(ASL2.0), jsch(LGPL), Velocity(ASL2.0), JGit(EDL), commons-compress(ASL2.0), commons-codec(ASL2.0)
+This software depends on jruby(CPL), groovy(ASL2.0), jsch(LGPL), Velocity(ASL2.0), JGit(EDL), commons-compress(ASL2.0), commons-codec(ASL2.0), aws-java-sdk(ASL2.0)
 respect Vagrant.

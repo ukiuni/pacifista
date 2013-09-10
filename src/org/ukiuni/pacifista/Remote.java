@@ -71,7 +71,13 @@ public class Remote {
 	}
 
 	public void connectWithAuthFile(String host, int port, String account, String authFilePath) throws IOException {
-		this.connect(host, port, account, null, new File(baseDir, authFilePath));
+		File authFile;
+		if (authFilePath.startsWith("/")) {
+			authFile = new File(authFilePath);
+		} else {
+			authFile = new File(baseDir, authFilePath);
+		}
+		this.connect(host, port, account, null, authFile);
 	}
 
 	public void connect(String host, int port, String account, final String password, File authFile) throws IOException {

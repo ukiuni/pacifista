@@ -9,11 +9,14 @@ public class VirtualMacine {
 		this.baseDir = baseDir;
 	}
 
-	public VirtualBoxHost getHost(String type, String host) {
-		return new VirtualBoxHost(host, baseDir);
+	public VirtualHost getHost(String type, String host) {
+		if ("AWS".equals(type)) {
+			return new EC2VirtualHost(baseDir, host);
+		}
+		return new VirtualBoxHost(baseDir, host);
 	}
 
-	public VirtualBoxHost getHost(String host) {
-		return new VirtualBoxHost(host, baseDir);
+	public VirtualHost getHost(String host) {
+		return new VirtualBoxHost(baseDir, host);
 	}
 }

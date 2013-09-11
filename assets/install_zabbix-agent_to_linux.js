@@ -4,6 +4,7 @@ var password = runtime.getEnv("password");
 var authFile = runtime.getEnv("authFile");
 var zabbixServer = runtime.getEnv("zabbixServer");
 var remote = runtime.getEnv("remote");
+var isRemoteRecieved = null != remote;
 var hostName = host;
 if (null == zabbixServer || null == host || (null == remote && ((null == host || null == user) || ( null == password && null == authFile)))) {
 	throw "host, user, password and zabbixServer must be specified in parameter. or zabbixServer and host in parameter and remote(Remote Object) in runtime.setEnv, like apache_openmeetings.insta..js?user=user&password=password";
@@ -16,6 +17,8 @@ if(null == remote){
 	remote.connect(host, 22, user, password);	
 } else if(!remote.isConnected()){
 	throw "remote object must be connected"
+} else {
+	
 }
 remote.execute("sudo yum install -y openssh-clients");
 remote.sendFile("./data/zabbix.repo", "/tmp/", "zabbix.repo");
@@ -35,4 +38,6 @@ while(!remote.execute("sudo /etc/init.d/zabbix-agent status").contains("running"
 	remote.execute("sudo /etc/init.d/zabbix-agent start");
 }
 console.log("zabbix-agent is now running.");
-remote.close();
+if(!isRemoteRecieved){
+	remote.close();
+}

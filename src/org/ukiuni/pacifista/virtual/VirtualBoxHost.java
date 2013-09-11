@@ -8,7 +8,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
@@ -129,15 +131,19 @@ public class VirtualBoxHost implements VirtualHost {
 	 * java.lang.String, int, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String downloadImage(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+	public String downloadImage(String url, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
 		InputStream in;
 		if (null == proxyHost) {
 			in = new URL(url).openConnection().getInputStream();
 		} else {
 			URLConnection connection = new URL(url).openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
 			if (null != proxyUser && null != proxyPass) {
-				String encoded = new String(Base64.encodeBase64(new String("username:password").getBytes()));
-				connection.setRequestProperty("Proxy-Authorization", "Basic " + encoded);
+				Authenticator.setDefault(new Authenticator() {
+					@Override
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(proxyUser, proxyPass.toCharArray());
+					}
+				});
 			}
 			in = connection.getInputStream();
 		}

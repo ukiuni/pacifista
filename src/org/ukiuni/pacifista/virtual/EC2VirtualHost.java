@@ -72,20 +72,22 @@ public class EC2VirtualHost implements VirtualHost {
 
 	@Override
 	public boolean isRunning() {
-		return isStatus(com.amazonaws.services.ec2.model.InstanceStateName.Running);
+		return isStatus(InstanceStateName.Running);
 	}
 
 	private boolean isStatus(InstanceStateName status) {
+		loadInstanceId();
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		describeInstancesRequest.setInstanceIds(Arrays.asList(this.instanceId));
 		DescribeInstancesResult describeInstancesResult = createClient().describeInstances(describeInstancesRequest);
-		if (!describeInstancesResult.getReservations().isEmpty()) {
+		if (describeInstancesResult.getReservations().isEmpty()) {
 			return false;
 		}
 		if (describeInstancesResult.getReservations().get(0).getInstances().isEmpty()) {
 			return false;
 		}
-		return status.equals(describeInstancesResult.getReservations().get(0).getInstances().get(0).getState().getName());
+		boolean result = status.toString().equals(describeInstancesResult.getReservations().get(0).getInstances().get(0).getState().getName());
+		return result;
 	}
 
 	@Override
@@ -159,12 +161,11 @@ public class EC2VirtualHost implements VirtualHost {
 
 		this.instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
 
-		//while (!isStatus(InstanceStateName.Running)) {
-		//	Thread.sleep(5000);
-		//}
-		Thread.sleep(10000);
-		
-		addTag(amazonEC2Client, "Name", host);
+		while (!isStatus(InstanceStateName.Running)) {
+			Thread.sleep(5000);
+		}
+
+		addTag("Name", host);
 
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		describeInstancesRequest.setInstanceIds(Arrays.asList(this.instanceId));
@@ -172,12 +173,13 @@ public class EC2VirtualHost implements VirtualHost {
 		return new InstanceSSHAddress(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicDnsName(), 22, keyFile.getAbsolutePath());
 	}
 
-	private void addTag(AmazonEC2Client amazonEC2Client, String key, String value) {
+	private void addTag(String key, String value) {
 		ArrayList<Tag> requestTags = new ArrayList<Tag>();
 		requestTags.add(new Tag(key, value));
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
 		createTagsRequest.withResources(this.instanceId);
 		createTagsRequest.setTags(requestTags);
+		AmazonEC2Client amazonEC2Client = createClient();
 		amazonEC2Client.createTags(createTagsRequest);
 	}
 
@@ -195,7 +197,7 @@ public class EC2VirtualHost implements VirtualHost {
 		if (describeInstancesResult.getReservations().isEmpty() || describeInstancesResult.getReservations().get(0).getInstances().isEmpty()) {
 			return null;
 		} else {
-			return describeInstancesResult.getReservations().get(0).getInstances().get(0);
+			return describeInstancesResult.getReservations().get(describeInstancesResult.getReservations().size() - 1).getInstances().get(describeInstancesResult.getReservations().get(describeInstancesResult.getReservations().size() - 1).getInstances().size() - 1);
 		}
 	}
 
@@ -207,19 +209,24 @@ public class EC2VirtualHost implements VirtualHost {
 		if (null == instance) {
 			return null;
 		}
-		return instance.getInstanceId();
+		this.instanceId = instance.getInstanceId();
+		return this.instanceId;
 	}
 
 	@Override
 	public void remove() throws IOException, InterruptedException {
 		AmazonEC2Client client = createClient();
 		String instanceId = loadInstanceId();
-		TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(Arrays.asList(instanceId));
-		client.terminateInstances(terminateInstancesRequest);
-		// addTag(client, "Name", host+"_deleted");
-		//while (!isStatus(InstanceStateName.Terminated)) {
-		//	Thread.sleep(5000);
-		//}
+		try {
+			addTag("Name", host + "_deleted");
+			TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(Arrays.asList(instanceId));
+			client.terminateInstances(terminateInstancesRequest);
+			while (!isStatus(InstanceStateName.Terminated)) {
+				Thread.sleep(5000);
+			}
+		} catch (Throwable e) {
+			// Do nothing
+		}
 		try {
 			DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(host + SUFFIX_KEY_NAME);
 			client.deleteKeyPair(deleteKeyPairRequest);
@@ -230,7 +237,6 @@ public class EC2VirtualHost implements VirtualHost {
 			DeleteSecurityGroupRequest deleteSecurityGroupRequest = new DeleteSecurityGroupRequest(host + SUFFIX_GROUP_NAME);
 			client.deleteSecurityGroup(deleteSecurityGroupRequest);
 		} catch (Throwable e) {
-			e.printStackTrace();
 			// Do nothing.
 		}
 	}

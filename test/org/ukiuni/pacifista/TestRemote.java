@@ -75,9 +75,9 @@ public class TestRemote {
 
 		System.out.println(shell.read());
 
-		shell.exec("ls --color=no");
+		shell.execute("ls --color=no");
 		System.out.println(shell.read());
-		shell.exec("echo $?");
+		shell.execute("echo $?");
 		byte[] buffer = new byte[2];
 		shell.read(buffer);
 		Assert.assertEquals("0", new String(buffer).trim());

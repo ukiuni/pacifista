@@ -20,7 +20,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.ukiuni.pacifista.Local;
@@ -196,7 +195,7 @@ public class VirtualBoxHost implements VirtualHost {
 	@Override
 	public InstanceSSHAddress create(String stragePath) throws IOException, InterruptedException {
 		int port = new Random().nextInt(65535);
-		create(stragePath, "RedHat_64", "512", port);
+		create(stragePath, "RedHat_64", 512, port);
 		return new InstanceSSHAddress("localhost", port, null);
 	}
 
@@ -207,7 +206,10 @@ public class VirtualBoxHost implements VirtualHost {
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public InstanceSSHAddress create(String stragePath, String type, String memory, int port) throws IOException, InterruptedException {
+	public InstanceSSHAddress create(String stragePath, String type, int memory, int port) throws IOException, InterruptedException {
+		if (!stragePath.startsWith("/")) {
+			stragePath = new File(baseDir, stragePath).getAbsolutePath();
+		}
 		String returnValue = Local.execute(new String[] { "VBoxManage", "createvm", "--name", host, "--ostype", type });
 
 		BufferedReader reader = new BufferedReader(new StringReader(returnValue));
@@ -223,7 +225,7 @@ public class VirtualBoxHost implements VirtualHost {
 		}
 
 		Local.execute(new String[] { "VBoxManage", "registervm", vboxFile });
-		Local.execute(new String[] { "VBoxManage", "modifyvm", host, "--memory", memory, "--nic1", "nat", "--nictype1", "82545EM" });
+		Local.execute(new String[] { "VBoxManage", "modifyvm", host, "--memory", String.valueOf(memory), "--nic1", "nat", "--nictype1", "82545EM" });
 		Local.execute(new String[] { "VBoxManage", "storagectl", host, "--name", host + "sata1", "--add", "sata", "--bootable", "on" });
 		Local.execute(new String[] { "VBoxManage", "-nologo", "internalcommands", "sethduuid", stragePath });
 		Local.execute(new String[] { "VBoxManage", "storageattach", host, "--storagectl", host + "sata1", "--port", "0", "--device", "0", "--type", "hdd", "--medium", stragePath });

@@ -1,6 +1,7 @@
 var hostName = "MyVirtualMacine"
 var host = VirtualMacine.getHost("AWS", hostName);
-host.setParameters("accessKey=AKIAIOWTKMBOJSTI6QBQ&secretKey=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&endpoint=ec2.ap-northeast-1.amazonaws.com&imageId=ami-39b23d38");
+host.setParameters("accessKey=AKIAIOWTKMBOJSTI6QBQ&secretKey=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");
+//host.setParameters("accessKey=AKIAIOWTKMBOJSTI6QBQ&secretKey=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&endpoint=ec2.ap-northeast-1.amazonaws.com&imageId=ami-39b23d38");
 if(host.isExist()){
 	if(host.isRunning()){
 		host.shutdown();
@@ -24,6 +25,6 @@ runtime.setEnv("zabbixServer", "zabbixServer");
 runtime.setEnv("host", "myhost");
 runtime.call("assets/install_zabbix-agent_to_linux.js");
 console.log(remote.execute("ls -al"));
-//host.shutdown();
-//host.remove();
+host.shutdown();
+host.remove();
 //local.remove("vmimages/"+hostName);

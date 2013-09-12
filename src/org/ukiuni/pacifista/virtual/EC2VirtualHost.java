@@ -18,7 +18,6 @@ import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
 import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
 import com.amazonaws.services.ec2.model.CreateKeyPairResult;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
-import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
@@ -117,36 +116,39 @@ public class EC2VirtualHost implements VirtualHost {
 	@Override
 	public InstanceSSHAddress create(String stragePath) throws IOException, InterruptedException {
 		AmazonEC2Client amazonEC2Client = createClient();
-
-		String securityGroupName = host + SUFFIX_GROUP_NAME;
-		String keyName = host + SUFFIX_KEY_NAME;
-		CreateSecurityGroupRequest createSecurityGroupRequest = new CreateSecurityGroupRequest();
-		createSecurityGroupRequest.withGroupName(securityGroupName).withDescription(host + " s Security Group");
-		CreateSecurityGroupResult createSecurityGroupResult = amazonEC2Client.createSecurityGroup(createSecurityGroupRequest);
-		IpPermission ipPermission = new IpPermission();
+		String securityGroupName;
+		if (parameterMap.containsKey("securityGroupName")) {
+			securityGroupName = parameterMap.get("securityGroupName");
+		} else {
+			securityGroupName = host + SUFFIX_GROUP_NAME;
+			CreateSecurityGroupRequest createSecurityGroupRequest = new CreateSecurityGroupRequest();
+			createSecurityGroupRequest.withGroupName(securityGroupName).withDescription(host + " s Security Group");
+			amazonEC2Client.createSecurityGroup(createSecurityGroupRequest);
+		}
 		String ipRange = "0.0.0.0/0";
 		if (null != parameterMap.get("sshAccessibleIpRange")) {
 			ipRange = parameterMap.get("sshAccessibleIpRange");
 		}
-		ipPermission.withIpRanges(ipRange).withIpProtocol("tcp").withFromPort(22).withToPort(22);
-		AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest = new AuthorizeSecurityGroupIngressRequest();
-		authorizeSecurityGroupIngressRequest.withGroupName(securityGroupName).withIpPermissions(ipPermission);
-		amazonEC2Client.authorizeSecurityGroupIngress(authorizeSecurityGroupIngressRequest);
+		openPort("tcp", 22, ipRange);
 
-		CreateKeyPairRequest createKeyPairRequest = new CreateKeyPairRequest();
-
-		createKeyPairRequest.withKeyName(keyName);
-		CreateKeyPairResult createKeyPairResult = amazonEC2Client.createKeyPair(createKeyPairRequest);
-		KeyPair keyPair = new KeyPair();
-		keyPair = createKeyPairResult.getKeyPair();
-		String privateKey = keyPair.getKeyMaterial();
-		File virtualMacineDir = new File(new File(baseDir, "vmimages"), host);
-		virtualMacineDir.mkdirs();
-		File keyFile = new File(virtualMacineDir, keyPair.getKeyName() + ".key");
-		FileOutputStream out = new FileOutputStream(keyFile);
-		out.write(privateKey.getBytes());
-		out.close();
-
+		File keyFile = null;
+		String keyName;
+		if (parameterMap.containsKey("keyName")) {
+			keyName = parameterMap.get("keyName");
+		} else {
+			keyName = host + SUFFIX_KEY_NAME;
+			CreateKeyPairRequest createKeyPairRequest = new CreateKeyPairRequest();
+			createKeyPairRequest.withKeyName(keyName);
+			CreateKeyPairResult createKeyPairResult = amazonEC2Client.createKeyPair(createKeyPairRequest);
+			KeyPair keyPair = createKeyPairResult.getKeyPair();
+			String privateKey = keyPair.getKeyMaterial();
+			File virtualMacineDir = new File(new File(baseDir, "vmimages"), host);
+			virtualMacineDir.mkdirs();
+			keyFile = new File(virtualMacineDir, keyPair.getKeyName() + ".key");
+			FileOutputStream out = new FileOutputStream(keyFile);
+			out.write(privateKey.getBytes());
+			out.close();
+		}
 		String imageId = "ami-05355a6c";
 		if (parameterMap.containsKey("imageId")) {
 			imageId = parameterMap.get("imageId");
@@ -170,10 +172,29 @@ public class EC2VirtualHost implements VirtualHost {
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		describeInstancesRequest.setInstanceIds(Arrays.asList(this.instanceId));
 		DescribeInstancesResult describeInstancesResult = amazonEC2Client.describeInstances(describeInstancesRequest);
-		return new InstanceSSHAddress(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicDnsName(), 22, keyFile.getAbsolutePath());
+		String keyPath = null;
+		if (null != keyFile) {
+			keyPath = keyFile.getAbsolutePath();
+		}
+		return new InstanceSSHAddress(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicDnsName(), 22, keyPath);
 	}
 
-	private void addTag(String key, String value) {
+	public void openPort(String protocol, int port, String ipRange) {
+		String securityGroupName;
+		if (parameterMap.containsKey("securityGroupName")) {
+			securityGroupName = parameterMap.get("securityGroupName");
+		} else {
+			securityGroupName = host + SUFFIX_GROUP_NAME;
+		}
+		IpPermission ipPermission = new IpPermission();
+		ipPermission.withIpRanges(ipRange).withIpProtocol(protocol).withFromPort(port).withToPort(port);
+		AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest = new AuthorizeSecurityGroupIngressRequest();
+		authorizeSecurityGroupIngressRequest.withGroupName(securityGroupName).withIpPermissions(ipPermission);
+		AmazonEC2Client amazonEC2Client = createClient();
+		amazonEC2Client.authorizeSecurityGroupIngress(authorizeSecurityGroupIngressRequest);
+	}
+
+	public void addTag(String key, String value) {
 		ArrayList<Tag> requestTags = new ArrayList<Tag>();
 		requestTags.add(new Tag(key, value));
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
@@ -184,7 +205,7 @@ public class EC2VirtualHost implements VirtualHost {
 	}
 
 	@Override
-	public InstanceSSHAddress create(String stragePath, String type, String memory, int port) throws IOException, InterruptedException {
+	public InstanceSSHAddress create(String stragePath, String type, int memory, int port) throws IOException, InterruptedException {
 		return this.create(stragePath);
 	}
 

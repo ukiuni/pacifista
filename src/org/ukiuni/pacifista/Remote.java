@@ -366,7 +366,7 @@ public class Remote {
 			}
 		}
 
-		public void exec(String command) throws IOException {
+		public void execute(String command) throws IOException {
 			byte[] sendCommandBytes = (command + "\n").getBytes(encode);
 			this.out.write(sendCommandBytes);
 			this.out.write(new byte[1]);

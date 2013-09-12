@@ -22,7 +22,7 @@ public interface VirtualHost {
 
 	public abstract InstanceSSHAddress create(String stragePath) throws IOException, InterruptedException;
 
-	public abstract InstanceSSHAddress create(String stragePath, String type, String memory, int port) throws IOException, InterruptedException;
+	public abstract InstanceSSHAddress create(String stragePath, String type, int memory, int port) throws IOException, InterruptedException;
 
 	public abstract void remove() throws IOException, InterruptedException;
 

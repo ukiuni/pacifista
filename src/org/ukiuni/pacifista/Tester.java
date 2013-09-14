@@ -23,10 +23,22 @@ public class Tester {
 		this.remote = remote;
 	}
 
+	/**
+	 * Create Tester object test remote.
+	 * 
+	 * @param remote
+	 * @return
+	 */
 	public Tester create(Remote remote) {
 		return new Tester(remote);
 	}
 
+	/**
+	 * Assert arg1 and arg2 is same.
+	 * 
+	 * @param arg1
+	 * @param arg2
+	 */
 	public void assertEquals(Object arg1, Object arg2) {
 		if (null == arg1 && null == arg2) {
 			return;
@@ -36,18 +48,45 @@ public class Tester {
 		}
 	}
 
+	/**
+	 * Assert remote file is mode.
+	 * @param path
+	 * @param mode
+	 * @throws IOException
+	 * @throws AssertionError
+	 */
 	public void assertFile(String path, String mode) throws IOException, AssertionError {
 		assertFile(path, mode, null, null, null);
 	}
 
+	/**
+	 * Assert remote file is mode and owner.
+	 * @param path
+	 * @param mode
+	 * @param owner
+	 * @throws IOException
+	 * @throws AssertionError
+	 */
 	public void assertFile(String path, String mode, String owner) throws IOException, AssertionError {
 		assertFile(path, mode, null, owner, null);
 	}
 
+	/**
+	 * Assert remote path is file
+	 * @param path
+	 * @throws IOException
+	 * @throws AssertionError
+	 */
 	public void assertFileIsFile(String path) throws IOException, AssertionError {
 		assertFile(path, null, null, null, false);
 	}
 
+	/**
+	 * Assert remote path is Directory
+	 * @param path
+	 * @throws IOException
+	 * @throws AssertionError
+	 */
 	public void assertFileIsDirectory(String path) throws IOException, AssertionError {
 		assertFile(path, null, null, null, true);
 	}

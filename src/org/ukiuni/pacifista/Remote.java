@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -31,6 +33,7 @@ public class Remote {
 	private Session session;
 	private String encode = "UTF-8";
 	private String host;
+	private PrintStream out = System.out;
 
 	public Remote(File baseDir) {
 		this.baseDir = baseDir;
@@ -38,6 +41,14 @@ public class Remote {
 
 	protected void setProxy(String host, int port) {
 		setProxy(host, port, null, null);
+	}
+
+	public PrintStream getOut() {
+		return out;
+	}
+
+	public void setOut(PrintStream out) {
+		this.out = out;
 	}
 
 	public void setProxy(String host, int port, String userName, String password) {
@@ -49,7 +60,14 @@ public class Remote {
 	}
 
 	public int loadVersion() throws IOException {
-		String value = this.execute("cat /usr/local/pacifista/version");
+		return loadVersion("");
+	}
+
+	public int loadVersion(String name) throws IOException {
+		if ("".equals(name)) {
+			name = "/" + name;
+		}
+		String value = this.execute("cat /usr/local/pacifista" + name + "/version");
 		try {
 			return Integer.parseInt(value.trim());
 		} catch (NumberFormatException e) {
@@ -58,8 +76,15 @@ public class Remote {
 	}
 
 	public void sendVersion(int version) throws IOException {
-		this.execute("sudo mkdir /usr/local/pacifista/");
-		this.execute("sudo sh -c \"echo \'" + version + "\' > /usr/local/pacifista/version\"");
+		sendVersion("", version);
+	}
+
+	public void sendVersion(String name, int version) throws IOException {
+		if ("".equals(name)) {
+			name = "/" + name;
+		}
+		this.execute("sudo mkdir /usr/local/pacifista" + name);
+		this.execute("sudo sh -c \"echo \'" + version + "\' > /usr/local/pacifista" + name + "/version\"");
 	}
 
 	public void connect(String host, int port, String account, File authFile) throws IOException {
@@ -121,7 +146,22 @@ public class Remote {
 			if (proxy != null) {
 				this.session.setProxy(proxy);
 			}
-			this.session.connect();
+			for (int i = 0; i < 3; i++) {
+				try {
+					this.session.connect();
+					break;
+				} catch (Exception e) {
+					if (null != e.getCause() || e.getCause() instanceof ConnectException) {
+						try {
+							Thread.sleep(3000);
+						} catch (InterruptedException e1) {
+							// Do nothing
+						}
+					} else {
+						throw new IOException(e);
+					}
+				}
+			}
 		} catch (JSchException e) {
 			throw new IOException(e);
 		}
@@ -337,7 +377,7 @@ public class Remote {
 		}
 	}
 
-	public static class Shell {
+	public class Shell {
 		private final ChannelShell channel;
 		private final InputStream in;
 		private final OutputStream out;
@@ -366,16 +406,20 @@ public class Remote {
 			}
 		}
 
-		public void execute(String command) throws IOException {
+		public void call(String command) {
+			Remote.this.out.println(command);
+		}
+
+		public String execute(String command) throws IOException {
 			byte[] sendCommandBytes = (command + "\n").getBytes(encode);
 			this.out.write(sendCommandBytes);
 			this.out.write(new byte[1]);
 			this.out.flush();
 			byte[] commandResponseResultByte = new byte[sendCommandBytes.length];
-			in.read(commandResponseResultByte);
+			read(commandResponseResultByte);
 			String response = new String(commandResponseResultByte, encode);
 			if (response.replace("\r", "").replace("\n", "").equals(command.replace("\r", "").replace("\n", ""))) {
-				return;
+				return read();
 			}
 			throw new IOException("response bloken[" + response.replace("\r", "\\r").replace("\n", "\\n") + "] expect [" + (command + "\n").replace("\r", "\\r").replace("\n", "\\n") + "]");
 		}
@@ -425,6 +469,10 @@ public class Remote {
 		public void setLang(String lang) {
 			this.lang = lang;
 		}
+	}
+
+	public void call(String command) throws IOException {
+		out.println(execute(command));
 	}
 
 	public String execute(String command) throws IOException {

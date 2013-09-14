@@ -179,6 +179,11 @@ public class EC2VirtualHost implements VirtualHost {
 		return new InstanceSSHAddress(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicDnsName(), 22, keyPath);
 	}
 
+	@Override
+	public void openPort(String protocol, int port) throws IOException, InterruptedException {
+		openPort(protocol, port, "0.0.0.0/0");
+	}
+
 	public void openPort(String protocol, int port, String ipRange) {
 		String securityGroupName;
 		if (parameterMap.containsKey("securityGroupName")) {

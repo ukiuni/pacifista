@@ -16,7 +16,7 @@ public class Main {
 			baseDirPath = args[1];
 		}
 		File baseDir = new File(baseDirPath);
-		File templateDir = new File(baseDir, "template");
+		File templateDir = new File(baseDir, "templates");
 		try {
 			if (args.length > 2) {
 				for (int i = 2; i < args.length; i++) {

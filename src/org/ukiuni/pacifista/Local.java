@@ -4,21 +4,35 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.ukiuni.pacifista.util.IOUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
 
 public class Local {
 	private final File baseDir;
+	private PrintStream out = System.out;
 
 	public Local(File baseDir) {
 		this.baseDir = baseDir;
 	}
 
+	/**
+	 * make directory
+	 * 
+	 * @param path
+	 */
 	public void mkdir(String path) {
 		new File(baseDir, path).mkdirs();
 	}
 
+	/**
+	 * save value as file.
+	 * 
+	 * @param filePath
+	 * @param value
+	 * @throws IOException
+	 */
 	public void save(String filePath, String value) throws IOException {
 		save(filePath, value, "UTF-8");
 	}
@@ -31,6 +45,13 @@ public class Local {
 		out.close();
 	}
 
+	/**
+	 * copy file.
+	 * 
+	 * @param fromFilePath
+	 * @param toFilePath
+	 * @throws IOException
+	 */
 	public void copy(String fromFilePath, String toFilePath) throws IOException {
 		File fromFile = new File(baseDir, fromFilePath);
 		File toFile = new File(baseDir, toFilePath);
@@ -42,11 +63,21 @@ public class Local {
 		out.close();
 	}
 
+	/**
+	 * delete file.
+	 * 
+	 * @param filePath
+	 */
 	public void remove(String filePath) {
 		File file = new File(baseDir, filePath);
 		remove(file);
 	}
 
+	/**
+	 * delete file.
+	 * 
+	 * @param file
+	 */
 	public void remove(File file) {
 		if (file.isFile()) {
 			file.delete();
@@ -59,10 +90,25 @@ public class Local {
 		}
 	}
 
+	/**
+	 * Load file as String.
+	 * 
+	 * @param filePath
+	 * @return
+	 * @throws IOException
+	 */
 	public String load(String filePath) throws IOException {
 		return load(filePath, "UTF-8");
 	}
 
+	/**
+	 * Load file as String.
+	 * 
+	 * @param filePath
+	 * @param encode
+	 * @return
+	 * @throws IOException
+	 */
 	public String load(String filePath, String encode) throws IOException {
 		File file = new File(baseDir, filePath);
 		byte[] buffer = new byte[(int) file.length()];
@@ -72,10 +118,37 @@ public class Local {
 		return new String(buffer, encode);
 	}
 
+	/**
+	 * Execute command.
+	 * 
+	 * @param command
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static String execute(String command) throws IOException, InterruptedException {
 		return execute(command.split(" "));
 	}
 
+	/**
+	 * Execute command and output result.
+	 * 
+	 * @param command
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void call(String command) throws IOException, InterruptedException {
+		out.print(execute(command));
+	}
+
+	/**
+	 * Execute command.
+	 * 
+	 * @param command
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static String execute(String[] command) throws IOException, InterruptedException {
 		Process process = java.lang.Runtime.getRuntime().exec(command);
 		int returnCode = process.waitFor();
@@ -87,10 +160,26 @@ public class Local {
 		return returnMessage;
 	}
 
+	/**
+	 * Execute command with no block.
+	 * 
+	 * @param command
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static Process executeNowait(String command) throws IOException, InterruptedException {
 		return java.lang.Runtime.getRuntime().exec(command.split(" "));
 	}
 
+	/**
+	 * Execute command with no block.
+	 * 
+	 * @param command
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static Process executeNowait(String[] command) throws IOException, InterruptedException {
 		return java.lang.Runtime.getRuntime().exec(command);
 	}
@@ -106,10 +195,29 @@ public class Local {
 		return buffer.toString();
 	}
 
+	/**
+	 * Find file
+	 * 
+	 * @param path
+	 * @param fileName
+	 * @return absolute file path or null when not find.
+	 */
 	public static String find(String path, String fileName) {
-		return find(new File(path), fileName);
+		try {
+			return find(new File(path), fileName);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
+	/**
+	 * Find file
+	 * 
+	 * @param path
+	 * @param fileName
+	 * @return absolute file path or null when not find.
+	 */
 	public static String find(File file, String fileName) {
 		if (file.isFile()) {
 			if (file.getName().equals(fileName)) {
@@ -117,13 +225,23 @@ public class Local {
 			}
 		} else if (file.isDirectory()) {
 			File[] children = file.listFiles();
-			for (File child : children) {
-				String result = find(child, fileName);
-				if (null != result) {
-					return result;
+			if (null != children) {
+				for (File child : children) {
+					String result = find(child, fileName);
+					if (null != result) {
+						return result;
+					}
 				}
 			}
 		}
 		return null;
+	}
+
+	public PrintStream getOut() {
+		return out;
+	}
+
+	public void setOut(PrintStream out) {
+		this.out = out;
 	}
 }

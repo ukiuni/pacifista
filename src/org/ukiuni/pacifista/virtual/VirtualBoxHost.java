@@ -229,8 +229,7 @@ public class VirtualBoxHost implements VirtualHost {
 		Local.execute(new String[] { "VBoxManage", "storagectl", host, "--name", host + "sata1", "--add", "sata", "--bootable", "on" });
 		Local.execute(new String[] { "VBoxManage", "-nologo", "internalcommands", "sethduuid", stragePath });
 		Local.execute(new String[] { "VBoxManage", "storageattach", host, "--storagectl", host + "sata1", "--port", "0", "--device", "0", "--type", "hdd", "--medium", stragePath });
-		Local.execute(new String[] { "VBoxManage", "controlvm", host, "natpf1", "SSH,tcp,," + port + ",,22" });
-
+		openPort("tcp", port, 22);
 		String vagrantSettingFilePath = Local.find(new File(new File(baseDir, "vmimages"), host), "Vagrantfile");
 		if (null != vagrantSettingFilePath) {
 			Map<String, String> param = loadVagrantSetting(vagrantSettingFilePath);
@@ -256,6 +255,15 @@ public class VirtualBoxHost implements VirtualHost {
 		return param;
 	}
 
+	@Override
+	public void openPort(String protocol, int port) throws IOException, InterruptedException {
+		openPort(protocol, port, port);
+	}
+
+	public String openPort(String protocol, int localPort, int hostPort) throws IOException, InterruptedException {
+		return Local.execute(new String[] { "VBoxManage", "controlvm", host, "natpf1", "," + protocol + ",," + localPort + ",," + hostPort });
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -263,6 +271,13 @@ public class VirtualBoxHost implements VirtualHost {
 	 */
 	@Override
 	public void remove() throws IOException, InterruptedException {
+		try {
+			if (isRunning()) {
+				shutdown();
+			}
+		} catch (Throwable e) {
+			// do nothing
+		}
 		Process process = Runtime.getRuntime().exec(new String[] { "VBoxManage", "unregistervm", host, "--delete" });
 		int returnCode = process.waitFor();
 		if (0 != returnCode) {

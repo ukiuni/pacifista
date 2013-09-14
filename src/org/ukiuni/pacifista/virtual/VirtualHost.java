@@ -26,6 +26,8 @@ public interface VirtualHost {
 
 	public abstract void remove() throws IOException, InterruptedException;
 
+	public abstract void openPort(String protocol, int port) throws IOException, InterruptedException;
+
 	public static class InstanceSSHAddress {
 		public String host;
 		public int port;

@@ -5,7 +5,7 @@ remote.execute "mkdir forSendDirtest"
 remote.execute "touch forSendDirtest/jruby.pacifista.txt"
 templateparameter = "replaced value"
 username = $runtime.get_env "USER"
-template = $Template.create "testTemplate.vm"
+template = $Template.createWithFile "testTemplate.vm"
 template.put "parameter", templateparameter
 template.put "username", username
 template.put "lang", "Ruby";

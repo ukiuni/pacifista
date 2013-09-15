@@ -24,7 +24,7 @@ remote.execute("sudo yum install -y openssh-clients");
 remote.sendFile("./data/zabbix.repo", "/tmp/", "zabbix.repo");
 remote.execute("sudo mv /tmp/zabbix.repo /etc/yum.repos.d/");
 remote.execute("sudo yum install -y zabbix-agent");
-var template = Template.create("zabbix_agentd.conf.vm");
+var template = Template.createWithFile("zabbix_agentd.conf.vm");
 template.put("zabbixServer", zabbixServer);
 template.put("hostName", hostName);
 var zabbixAgentConf = template.toValue();

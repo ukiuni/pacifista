@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -146,12 +147,12 @@ public class Remote {
 			if (proxy != null) {
 				this.session.setProxy(proxy);
 			}
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 10; i++) {
 				try {
 					this.session.connect();
 					break;
 				} catch (Exception e) {
-					if (null != e.getCause() || e.getCause() instanceof ConnectException) {
+					if (i < 9 && (null != e.getCause() && (e.getCause() instanceof ConnectException || e.getCause() instanceof SocketException))) {
 						try {
 							Thread.sleep(3000);
 						} catch (InterruptedException e1) {

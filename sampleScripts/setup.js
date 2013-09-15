@@ -5,7 +5,7 @@ remote.execute("mkdir forSendDirtest");
 remote.execute("touch forSendDirtest/javaScript.pacifista.txt");
 var templateparameter = "replaced value";
 var username = runtime.getEnv("USER");
-var template = Template.create("testTemplate.vm");
+var template = Template.createWithFile("testTemplate.vm");
 template.put("parameter", templateparameter);
 template.put("username", username);
 template.put("lang", "javaScript");

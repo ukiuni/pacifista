@@ -111,8 +111,12 @@ public class ScriptingUtil {
 		if (script.startsWith("http://") || script.startsWith("https://")) {
 			URL url = new URL(script);
 			URLConnection connection = url.openConnection();
-			scriptEngine.put(ScriptEngine.FILENAME, url.getFile());
+			scriptEngine.put(ScriptEngine.FILENAME, script);
 			scriptEngine.eval(new InputStreamReader(connection.getInputStream()));
+		} else if (script.startsWith("/")) {
+			File file = new File(script);
+			scriptEngine.put(ScriptEngine.FILENAME, file.getName());
+			scriptEngine.eval(new FileReader(file));
 		} else {
 			File file = new File(baseDir, script);
 			scriptEngine.put(ScriptEngine.FILENAME, file.getName());
@@ -174,7 +178,7 @@ public class ScriptingUtil {
 			lsResult.date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(sprited[5] + " " + sprited[6]);
 			lsResult.name = sprited[7];
 		} catch (Throwable e) {
-			throw new RuntimeException("ls String [" + lsResultString + "] is not parseable.", e);
+			throw new RuntimeException("ls String \"" + lsResultString + "\" is not parseable.", e);
 		}
 		return lsResult;
 	}

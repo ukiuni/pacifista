@@ -5,13 +5,17 @@ remote.execute("mkdir forSendDirtest");
 remote.execute("touch forSendDirtest/groovy.pacifista.txt");
 def templateparameter = "replaced value";
 def username = runtime.getEnv("USER");
-def template = Template.create("testTemplate.vm");
+def template = Template.createWithFile("testTemplate.vm");
 template.put("parameter", templateparameter);
 template.put("username", username);
 template.put("lang", "groovy");
 def config = template.toValue();
 remote.send(config, "forSendDirtest", "groovyConfig");
 def tester = Tester.create(remote);
+
+remote = Remote.create();
+remote.connect("virtualhost", 22, "user", "password");
+
 tester.assertFile("/etc/hosts", "rw-r--r--", "root");
 tester.assertPortOpen(22);
 tester.assertCommand("hostname", "localhost.localdomain");

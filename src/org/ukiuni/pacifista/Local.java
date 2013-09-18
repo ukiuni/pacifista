@@ -1,5 +1,6 @@
 package org.ukiuni.pacifista;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -243,5 +244,39 @@ public class Local {
 
 	public void setOut(PrintStream out) {
 		this.out = out;
+	}
+
+	public String download(String url) throws IOException {
+		return download(url, "UTF-8");
+	}
+
+	public String download(String url, String encode) throws IOException {
+		return download(url, encode, null, 0, null, null);
+	}
+
+	public String download(String url, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+		return download(url, "UTF-8", null, 0, null, null);
+	}
+
+	public String download(String url, String encode, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		Http.download(url, out);
+		return new String(out.toByteArray(), encode);
+	}
+
+	public void downloadAsFile(String url, String path) throws IOException {
+		downloadAsFile(url, path, null, 0, null, null);
+	}
+
+	public void downloadAsFile(String url, String path, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+		File file;
+		if (path.startsWith("/")) {
+			file = new File(path);
+		} else {
+			file = new File(baseDir, path);
+		}
+		FileOutputStream out = new FileOutputStream(file);
+		Http.download(url, out);
+		out.close();
 	}
 }

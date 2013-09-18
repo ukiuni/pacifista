@@ -35,6 +35,7 @@ public class Remote {
 	private String encode = "UTF-8";
 	private String host;
 	private PrintStream out = System.out;
+	private String promptCharacter = "#";
 
 	public Remote(File baseDir) {
 		this.baseDir = baseDir;
@@ -407,8 +408,9 @@ public class Remote {
 			}
 		}
 
-		public void call(String command) {
-			Remote.this.out.println(command);
+		public void call(String command) throws IOException {
+			Remote.this.out.println(getPromptCharacter() + command);
+			Remote.this.out.println(execute(command));
 		}
 
 		public String execute(String command) throws IOException {
@@ -473,6 +475,7 @@ public class Remote {
 	}
 
 	public void call(String command) throws IOException {
+		out.println(getPromptCharacter() + command);
 		out.println(execute(command));
 	}
 
@@ -558,6 +561,14 @@ public class Remote {
 
 	public String getHost() {
 		return host;
+	}
+
+	public String getPromptCharacter() {
+		return promptCharacter;
+	}
+
+	public void setPromptCharacter(String promptCharacter) {
+		this.promptCharacter = promptCharacter;
 	}
 
 	public static interface MessageCallback {

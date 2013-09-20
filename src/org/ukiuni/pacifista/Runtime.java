@@ -13,10 +13,12 @@ public class Runtime {
 	private static final Map<String, Object> dataMap = new HashMap<String, Object>();
 	private final File templateDir;
 	private File baseDir;
+	private File pluginDir;
 
-	public Runtime(File baseDir, File templateDir, Map<String, Object> dataMap) {
+	public Runtime(File baseDir, File templateDir, File pluginDir, Map<String, Object> dataMap) {
 		this.baseDir = baseDir;
 		this.templateDir = templateDir;
+		this.pluginDir = pluginDir;
 		Runtime.dataMap.putAll(dataMap);
 	}
 
@@ -45,7 +47,7 @@ public class Runtime {
 			hashMap.putAll(ScriptingUtil.pickupParameters(script));
 			script = script.substring(0, script.indexOf("?"));
 		}
-		ScriptingUtil.execScript(this.baseDir, script, this.templateDir, hashMap);
+		ScriptingUtil.execScript(this.baseDir, script, this.templateDir, this.pluginDir, hashMap);
 	}
 
 	public void sleep(long wait) throws InterruptedException {

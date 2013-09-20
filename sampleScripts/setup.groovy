@@ -32,4 +32,5 @@ git.clone("https://github.com/ukiuni/pacifista.git", "data/test/gitDir");
 local.remove("data/test");
 remote.close();
 runtime.call("sampleScripts/otherScript.js");
+console.log(plugin.sayHello("groovy"));
 console.log("groovy complete");

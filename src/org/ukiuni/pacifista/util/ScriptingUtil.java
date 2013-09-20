@@ -24,6 +24,8 @@ import javax.script.ScriptException;
 import org.ukiuni.pacifista.Console;
 import org.ukiuni.pacifista.Git;
 import org.ukiuni.pacifista.Local;
+import org.ukiuni.pacifista.PluginLoader;
+import org.ukiuni.pacifista.PluginLoader.Plugin;
 import org.ukiuni.pacifista.RemoteFactory;
 import org.ukiuni.pacifista.Runtime;
 import org.ukiuni.pacifista.Tester;
@@ -31,7 +33,7 @@ import org.ukiuni.pacifista.velocity.VelocityWrapper;
 import org.ukiuni.pacifista.virtual.VirtualMachine;
 
 public class ScriptingUtil {
-	public static void execFolder(File baseDir, File target, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execFolder(File baseDir, File target, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException {
 		if (!target.exists()) {
 			throw new FileNotFoundException(target.getAbsolutePath());
 		}
@@ -60,10 +62,10 @@ public class ScriptingUtil {
 		});
 		for (File file : sortedList) {
 			if (file.isDirectory()) {
-				execFolder(baseDir, file, templateDir, parameters);
+				execFolder(baseDir, file, templateDir, pluginDir, parameters);
 			} else if (file.isFile()) {
 				String canonical = picupCanonical(baseDir, file);
-				execScript(baseDir, canonical, templateDir, parameters);
+				execScript(baseDir, canonical, templateDir, pluginDir, parameters);
 			}
 		}
 	}
@@ -84,17 +86,17 @@ public class ScriptingUtil {
 		return canonical;
 	}
 
-	public static void execScript(File baseDir, String script, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execScript(File baseDir, String script, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException {
 		if (script.endsWith(".js")) {
-			execScript("JavaScript", baseDir, script, templateDir, parameters);
+			execScript("JavaScript", baseDir, script, templateDir, pluginDir, parameters);
 		} else if (script.endsWith(".rb")) {
-			execScript("jruby", baseDir, script, templateDir, parameters);
+			execScript("jruby", baseDir, script, templateDir, pluginDir, parameters);
 		} else if (script.endsWith(".groovy")) {
-			execScript("groovy", baseDir, script, templateDir, parameters);
+			execScript("groovy", baseDir, script, templateDir, pluginDir, parameters);
 		}
 	}
 
-	public static void execScript(String lang, File baseDir, String script, File templateDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execScript(String lang, File baseDir, String script, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException {
 		if (null == parameters) {
 			parameters = new HashMap<String, Object>();
 		}
@@ -103,12 +105,29 @@ public class ScriptingUtil {
 		scriptEngine.put("Remote", new RemoteFactory(baseDir));
 		scriptEngine.put("Template", new VelocityWrapper(templateDir));
 		scriptEngine.put("console", new Console());
-		scriptEngine.put("runtime", new Runtime(baseDir, templateDir, parameters));
+		scriptEngine.put("runtime", new Runtime(baseDir, templateDir, pluginDir, parameters));
 		scriptEngine.put("Tester", new Tester());
 		scriptEngine.put("local", new Local(baseDir));
 		scriptEngine.put("git", new Git(baseDir));
 		scriptEngine.put("VirtualMachine", new VirtualMachine(baseDir));
 		scriptEngine.put("VirtualMacine", new VirtualMachine(baseDir));
+
+		if (null != pluginDir && pluginDir.isDirectory()) {
+			for (File pluginJar : pluginDir.listFiles()) {
+				if (pluginJar.getName().equals("README")) {
+					continue;
+				}
+				try {
+					List<Plugin> plugins = new PluginLoader().loadPlugin(pluginJar);
+					for (Plugin plugin : plugins) {
+						scriptEngine.put(plugin.getKey(), plugin.getInstance());
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 		if (script.startsWith("http://") || script.startsWith("https://")) {
 			URL url = new URL(script);
 			URLConnection connection = url.openConnection();

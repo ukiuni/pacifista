@@ -11,7 +11,7 @@ import org.ukiuni.pacifista.util.ScriptingUtil;
 public class TestingScriptingExecutor {
 	public static void main(String[] args) throws ScriptException, IOException {
 		try {
-			ScriptingUtil.execFolder(new File("."), new File("./testingScripts"), new File("template"), null);
+			ScriptingUtil.execFolder(new File("."), new File("./testingScripts"), new File("template"), new File("plugins"), null);
 		} finally {
 			RemoteFactory.closeAll();
 		}

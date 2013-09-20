@@ -20,6 +20,7 @@
 	<classpathentry kind="lib" path="libs/aws/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="libs/aws/httpclient-4.2.3.jar"/>
 	<classpathentry kind="lib" path="libs/aws/httpcore-4.2.jar"/>
+	<classpathentry kind="lib" path="plugins/samplePlugin.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="compiled"/>
 </classpath>

@@ -17,14 +17,15 @@ public class Main {
 		}
 		File baseDir = new File(baseDirPath);
 		File templateDir = new File(baseDir, "templates");
+		File pluginDir = new File(baseDir, "plugins");
 		try {
 			if (args.length > 2) {
 				for (int i = 2; i < args.length; i++) {
-					ScriptingUtil.execScript(baseDir, args[i], templateDir, null);
+					ScriptingUtil.execScript(baseDir, args[i], templateDir, pluginDir, null);
 				}
 			} else {
 				File scriptDir = new File(baseDir, "scripts");
-				ScriptingUtil.execFolder(baseDir, scriptDir, templateDir, null);
+				ScriptingUtil.execFolder(baseDir, scriptDir, templateDir, pluginDir, null);
 			}
 		} finally {
 			RemoteFactory.closeAll();

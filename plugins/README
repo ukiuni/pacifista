@@ -1,0 +1,18 @@
+Put jar file in this directory to use Pacifista Plugin.
+Pacifista Plugin is a class contained jar file.
+jar file has META-INF/MANIFEST.MF and manifest file have line such as,
+
+PacifistaPluginKey[0-9]+: key name use on script file. like myPlugin
+PacifistaPluginClass[0-9]+: class FQCN of plugin class. like com.example.pacifista.plugin.Plugin
+
+example.
+/////////////
+Manifest-Version: 1.0
+PacifistaPluginKey1: myPlugin
+PacifistaPluginClass1: com.example.pacifista.plugin.Plugin
+PacifistaPluginKey2: myPlugin
+PacifistaPluginClass2: com.example.pacifista.plugin.Plugin
+
+/////////////
+
+!!!last line is important!!!

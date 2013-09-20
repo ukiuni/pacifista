@@ -142,9 +142,9 @@ public class EC2VirtualHost implements VirtualHost {
 			CreateKeyPairResult createKeyPairResult = amazonEC2Client.createKeyPair(createKeyPairRequest);
 			KeyPair keyPair = createKeyPairResult.getKeyPair();
 			String privateKey = keyPair.getKeyMaterial();
-			File virtualMacineDir = new File(new File(baseDir, "vmimages"), host);
-			virtualMacineDir.mkdirs();
-			keyFile = new File(virtualMacineDir, keyPair.getKeyName() + ".key");
+			File virtualMachineDir = new File(new File(baseDir, "vmimages"), host);
+			virtualMachineDir.mkdirs();
+			keyFile = new File(virtualMachineDir, keyPair.getKeyName() + ".key");
 			FileOutputStream out = new FileOutputStream(keyFile);
 			out.write(privateKey.getBytes());
 			out.close();

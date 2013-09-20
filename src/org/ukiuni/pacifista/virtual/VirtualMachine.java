@@ -2,10 +2,10 @@ package org.ukiuni.pacifista.virtual;
 
 import java.io.File;
 
-public class VirtualMacine {
+public class VirtualMachine {
 	private File baseDir;
 
-	public VirtualMacine(File baseDir) {
+	public VirtualMachine(File baseDir) {
 		this.baseDir = baseDir;
 	}
 

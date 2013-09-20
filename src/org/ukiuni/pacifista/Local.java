@@ -254,11 +254,11 @@ public class Local {
 		return download(url, encode, null, 0, null, null);
 	}
 
-	public String download(String url, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+	public String download(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
 		return download(url, "UTF-8", null, 0, null, null);
 	}
 
-	public String download(String url, String encode, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+	public String download(String url, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		Http.download(url, out);
 		return new String(out.toByteArray(), encode);
@@ -268,7 +268,7 @@ public class Local {
 		downloadAsFile(url, path, null, 0, null, null);
 	}
 
-	public void downloadAsFile(String url, String path, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+	public void downloadAsFile(String url, String path, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
 		File file;
 		if (path.startsWith("/")) {
 			file = new File(path);

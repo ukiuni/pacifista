@@ -1,4 +1,4 @@
-var host = VirtualMacine.getHost("AWS", "MyVirtualMacine");
+var host = VirtualMachine.getHost("AWS", "MyVirtualMachine");
 host.setParameters("accessKey=XXXXXXXXX&secretKey=XXXXXXXXXXXX&endpoint=ec2.ap-northeast-1.amazonaws.com&imageId=ami-39b23d38");
 if(host.isExist()){
 	if(host.isRunning()){

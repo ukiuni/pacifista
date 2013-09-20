@@ -1,5 +1,5 @@
-var hostName = "MyVirtualMacine"
-var host = VirtualMacine.getHost(hostName);
+var hostName = "MyVirtualMachine"
+var host = VirtualMachine.getHost(hostName);
 if(host.isExist()){
 	if(host.isRunning()){
 		host.shutdown();

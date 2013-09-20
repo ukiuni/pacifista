@@ -1,1 +1,1 @@
-Virtual macine image will put this folder by VirtualMacine.getHost().downloadImage().
+Virtual machine image will put this folder by VirtualMachine.getHost().downloadImage().

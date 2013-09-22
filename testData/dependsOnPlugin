@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+	<name>dependsOnPlugin</name>
+	<version>v0.0.1</version>
+	<downloadFiles>
+		<downloadFile>
+			<from>http://ftp.riken.jp/net/apache//commons/el/binaries/commons-el-1.0.zip</from>
+			<to>testData/commons-el-1.0.zip</to>
+		</downloadFile>
+	</downloadFiles>
+	<dependsPlugins>
+		<dependsPlugin>
+			<name>dependsOnPlugin2</name>
+			<version>v0.0.1</version>
+		</dependsPlugin>
+	</dependsPlugins>
+</plugin>

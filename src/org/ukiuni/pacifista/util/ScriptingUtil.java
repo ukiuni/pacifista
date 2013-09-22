@@ -120,7 +120,7 @@ public class ScriptingUtil {
 				try {
 					List<Plugin> plugins = new PluginLoader().loadPlugin(pluginJar);
 					for (Plugin plugin : plugins) {
-						scriptEngine.put(plugin.getKey(), plugin.getInstance());
+						scriptEngine.put(plugin.getName(), plugin.getInstance());
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();

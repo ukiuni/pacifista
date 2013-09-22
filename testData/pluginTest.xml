@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+	<name>testPlugin</name>
+	<version>v0.0.1</version>
+	<downloadFiles>
+		<downloadFile>
+			<from>http://ftp.yz.yamagata-u.ac.jp/pub/network/apache//commons/cli/binaries/commons-cli-1.2-bin.zip</from>
+			<to>testData/commons-cli-1.2-bin.zip</to>
+		</downloadFile>
+	</downloadFiles>
+	<dependsPlugins>
+		<dependsPlugin>
+			<name>dependsOnPlugin</name>
+			<version>v0.0.12</version>
+		</dependsPlugin>
+		<dependsPlugin>
+			<name>dependsOnPlugin2</name>
+			<version>v0.0.1</version>
+		</dependsPlugin>
+	</dependsPlugins>
+</plugin>

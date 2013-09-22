@@ -2,15 +2,21 @@ Put jar file in this directory to use Pacifista Plugin.
 Pacifista Plugin is a class contained jar file.
 jar file has META-INF/MANIFEST.MF and manifest file have line such as,
 
-PacifistaPluginKey[0-9]+: key name use on script file. like myPlugin
-PacifistaPluginClass[0-9]+: class FQCN of plugin class. like com.example.pacifista.plugin.Plugin
+PacifistaPluginName[0-9]+: key name use on script file. like myPlugin. is needed.
+PacifistaPluginClass[0-9]+: class FQCN of plugin class. like com.example.pacifista.plugin.Plugin. Plugin class must have default constructor. is needed.
+PacifistaPluginVirsion[0-9]+: Version of the plugin. option.
+PacifistaPluginDescription[0-9]+: Description of the plugin. option.
+PacifistaPluginDependsOn[0-9]+: Plugins depends on, comma spirits if have meny. option.
 
 example.
 /////////////
 Manifest-Version: 1.0
-PacifistaPluginKey1: myPlugin
+PacifistaPluginName1: myPlugin
 PacifistaPluginClass1: com.example.pacifista.plugin.Plugin
-PacifistaPluginKey2: myPlugin
+PacifistaPluginVirsion1: v1.0.13
+PacifistaPluginDescription1: sample plugin.
+PacifistaPluginDependsOn1: ruby,jython,groovy
+PacifistaPluginName2: myPlugin
 PacifistaPluginClass2: com.example.pacifista.plugin.Plugin
 
 /////////////

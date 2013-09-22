@@ -17,10 +17,9 @@ public class Http {
 		download(url, out, null, 0, null, null);
 	}
 
-	public static void download(String url, OutputStream out, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
-		InputStream in;
+	public static URLConnection openConnection(String url, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
 		if (null == proxyHost) {
-			in = new URL(url).openConnection().getInputStream();
+			return new URL(url).openConnection();
 		} else {
 			URLConnection connection = new URL(url).openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
 			if (null != proxyUser && null != proxyPass) {
@@ -31,8 +30,12 @@ public class Http {
 					}
 				});
 			}
-			in = connection.getInputStream();
+			return connection;
 		}
+	}
+
+	public static void download(String url, OutputStream out, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+		InputStream in = openConnection(url, proxyHost, proxyPort, proxyUser, proxyPass).getInputStream();
 		IOUtil.copy(in, out);
 		in.close();
 	}

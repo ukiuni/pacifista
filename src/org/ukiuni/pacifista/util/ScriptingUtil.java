@@ -33,7 +33,7 @@ import org.ukiuni.pacifista.velocity.VelocityWrapper;
 import org.ukiuni.pacifista.virtual.VirtualMachine;
 
 public class ScriptingUtil {
-	public static void execFolder(File baseDir, File target, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execFolder(File baseDir, File target, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException, ScriptEngineNotFoundException {
 		if (!target.exists()) {
 			throw new FileNotFoundException(target.getAbsolutePath());
 		}
@@ -86,22 +86,27 @@ public class ScriptingUtil {
 		return canonical;
 	}
 
-	public static void execScript(File baseDir, String script, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execScript(File baseDir, String script, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException, ScriptEngineNotFoundException {
 		if (script.endsWith(".js")) {
 			execScript("JavaScript", baseDir, script, templateDir, pluginDir, parameters);
 		} else if (script.endsWith(".rb")) {
 			execScript("jruby", baseDir, script, templateDir, pluginDir, parameters);
 		} else if (script.endsWith(".groovy")) {
 			execScript("groovy", baseDir, script, templateDir, pluginDir, parameters);
+		} else if (script.endsWith(".py")) {
+			execScript("python", baseDir, script, templateDir, pluginDir, parameters);
 		}
 	}
 
-	public static void execScript(String lang, File baseDir, String script, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException {
+	public static void execScript(String lang, File baseDir, String script, File templateDir, File pluginDir, Map<String, Object> parameters) throws ScriptException, IOException, ScriptEngineNotFoundException {
 		if (null == parameters) {
 			parameters = new HashMap<String, Object>();
 		}
 		ScriptEngineManager scriptManager = new ScriptEngineManager();
 		ScriptEngine scriptEngine = scriptManager.getEngineByName(lang);
+		if (null == scriptEngine) {
+			throw new ScriptEngineNotFoundException(lang);
+		}
 		scriptEngine.put("Remote", new RemoteFactory(baseDir));
 		scriptEngine.put("Template", new VelocityWrapper(templateDir));
 		scriptEngine.put("console", new Console());
@@ -167,16 +172,7 @@ public class ScriptingUtil {
 
 	public static Map<String, String> parseParameters(String query) {
 		Map<String, String> map = new HashMap<String, String>();
-
-		String[] parameterSets = query.split("&");
-		for (int i = 0; i < parameterSets.length; i++) {
-			int questIndex = parameterSets[i].indexOf("=");
-			if (questIndex > 0) {
-				String key = parameterSets[i].substring(0, questIndex);
-				String value = parameterSets[i].substring(questIndex + 1);
-				map.put(key, value);
-			}
-		}
+		parseParameters(map, query);
 		return map;
 	}
 
@@ -211,5 +207,23 @@ public class ScriptingUtil {
 		public Date date;
 		public long size;
 		public String name;
+	}
+
+	@SuppressWarnings("serial")
+	public static class ScriptEngineNotFoundException extends Exception {
+		public String script;
+
+		public ScriptEngineNotFoundException(String script) {
+			this.script = script;
+		}
+
+		public String getScript() {
+			return script;
+		}
+
+		public void setScript(String script) {
+			this.script = script;
+		}
+
 	}
 }

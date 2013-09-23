@@ -60,6 +60,15 @@ public class TestPluginLoader {
 
 		new File("testData/commons-el-1.0.zip").delete();
 		new File("testData/commons-email-1.3.1-bin.zip").delete();
-
+	}
+	@Test
+	public void testDownloadFromWeb() throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+		PluginLoader pluginLoader = new PluginLoader();
+		pluginLoader.setPluginHostUrl("http://localhost:8080/PacifistaWeb/plugins/xml/");
+		pluginLoader.downloadPluginIfNotHave(new File("."), pluginLoader.loadAllPluginFromDirectory(new File("plugins")), "python", null, null, 0, null, null);
+		Assert.assertTrue(new File("plugins/jython-engine-.jar").isFile());
+		Assert.assertTrue(new File("plugins/jython-2.5.3.jar").isFile());
+		new File("plugins/jython-engine-.jar").delete();
+		new File("plugins/jython-2.5.3.jar").delete();
 	}
 }

@@ -31,7 +31,7 @@ public class PluginLoader {
 	private static final String PACIFISTA_PLUGIN_ATTRIBUTE_VERSION = "PacifistaPluginVirsion";
 	private static final String PACIFISTA_PLUGIN_ATTRIBUTE_DESCRIPTION = "PacifistaPluginDescription";
 	private static final String PACIFISTA_PLUGIN_ATTRIBUTE_PLUGINSDEPENDSON = "PacifistaPluginDependsOn";
-	private static final String PACIFISTA_PLUGIN_HOST_URL = "http://pacifista.ukiuni.org/plugins/";
+	private static final String PACIFISTA_PLUGIN_HOST_URL = "http://pacifista.ukiuni.org/plugins/xml/";
 	private String pluginHostUrl = PACIFISTA_PLUGIN_HOST_URL;
 
 	public void downloadPluginIfNotHave(File baseDir, List<Plugin> aleadyExistsPlugin, String name, String version, String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
@@ -86,7 +86,7 @@ public class PluginLoader {
 
 	public void loadPluginInfo(String urlPath, Set<PluginDownloadInfo> pluginDownloadInfos, boolean loadDependsOn, String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
 		URLConnection connection = Http.openConnection(urlPath, proxyHost, proxyPort, proxyUser, proxyPassword);
-		if (connection instanceof HttpURLConnection && 300 >= ((HttpURLConnection) connection).getResponseCode()) {
+		if (connection instanceof HttpURLConnection && 300 <= ((HttpURLConnection) connection).getResponseCode()) {
 			throw new IOException("response code is " + ((HttpURLConnection) connection).getResponseCode());
 		}
 		InputStream in = connection.getInputStream();
@@ -263,7 +263,7 @@ public class PluginLoader {
 		public void startElement(String uri, String localName, String qName, org.xml.sax.Attributes attributes) throws SAXException {
 			if (qName.equals("downloadFile")) {
 				currentDownloadFile = new DownloadFile();
-			} else if (qName.equals("dependsPlugin")) {
+			} else if (qName.equals("dependsOnPlugin")) {
 				currentPlugin = new Plugin();
 				inPlugin = true;
 			}
@@ -276,7 +276,7 @@ public class PluginLoader {
 					currentPlugin.setName(currentValue);
 				} else if (qName.equals("version")) {
 					currentPlugin.setVersion(currentValue);
-				} else if (qName.equals("dependsPlugin")) {
+				} else if (qName.equals("dependsOnPlugin")) {
 					downloadInfo.dependsOns.add(currentPlugin);
 					currentPlugin = null;
 					inPlugin = false;

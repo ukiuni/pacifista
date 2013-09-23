@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.script.ScriptException;
 
 import org.ukiuni.pacifista.util.ScriptingUtil;
+import org.ukiuni.pacifista.util.ScriptingUtil.ScriptEngineNotFoundException;
 
 public class Runtime {
 	private static final Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -41,7 +42,7 @@ public class Runtime {
 		setEnv(key, value);
 	}
 
-	public void call(String script) throws ScriptException, IOException {
+	public void call(String script) throws ScriptException, IOException, ScriptEngineNotFoundException {
 		Map<String, Object> hashMap = new HashMap<String, Object>(Runtime.dataMap);
 		if (script.contains("?")) {
 			hashMap.putAll(ScriptingUtil.pickupParameters(script));

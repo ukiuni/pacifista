@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.ukiuni.pacifista.util.IOUtil;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -38,10 +39,26 @@ public class PluginLoader {
 		Set<PluginDownloadInfo> loadPluginInfos = loadPluginInfo(name, version, true, proxyHost, proxyPort, proxyUser, proxyPassword);
 		for (PluginDownloadInfo pluginDownloadInfo : loadPluginInfos) {
 			if (!hasAleady(aleadyExistsPlugin, pluginDownloadInfo)) {
+				List<File> downloadedFiles = new ArrayList<File>();
 				for (DownloadFile downloadFile : pluginDownloadInfo.getDownloadFiles()) {
-					FileOutputStream out = new FileOutputStream(new File(baseDir, downloadFile.downloadTo));
-					Http.download(downloadFile.downloadFrom, out, proxyHost, proxyPort, proxyUser, proxyPassword);
-					out.close();
+					File file = new File(baseDir, downloadFile.downloadTo);
+					file.getParentFile().mkdirs();
+					FileOutputStream out = new FileOutputStream(file);
+					try {
+						Http.download(downloadFile.downloadFrom, out, proxyHost, proxyPort, proxyUser, proxyPassword);
+						downloadedFiles.add(file);
+					} catch (IOException e) {
+						IOUtil.close(out);
+						if (null != file) {
+							file.delete();
+						}
+						for (File downloadedFile : downloadedFiles) {
+							downloadedFile.delete();
+						}
+						throw e;
+					} finally {
+						IOUtil.close(out);
+					}
 				}
 			}
 		}
@@ -111,6 +128,29 @@ public class PluginLoader {
 				loadPluginInfo(dependsOnPlugin.name, dependsOnPlugin.version, pluginDownloadInfos, loadDependsOn, proxyHost, proxyPort, proxyUser, proxyPassword);
 			}
 		}
+	}
+
+	public List<PluginDownloadInfo> loadAllPluginInfos(String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
+		URLConnection connection = Http.openConnection(getPluginHostUrl(), proxyHost, proxyPort, proxyUser, proxyPassword);
+		if (connection instanceof HttpURLConnection && 300 <= ((HttpURLConnection) connection).getResponseCode()) {
+			throw new IOException("response code is " + ((HttpURLConnection) connection).getResponseCode());
+		}
+		InputStream in = connection.getInputStream();
+		return loadAllPluginInfos(in);
+	}
+
+	public List<PluginDownloadInfo> loadAllPluginInfos(InputStream in) throws IOException {
+		SAXParserFactory spfactory = SAXParserFactory.newInstance();
+		PluginListHandler handler = new PluginListHandler();
+		try {
+			SAXParser parser = spfactory.newSAXParser();
+			parser.parse(in, handler);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+		in.close();
+		return handler.getPluginDownloadInfos();
+
 	}
 
 	private boolean isAleadyHasDependency(Set<PluginDownloadInfo> pluginDownloadInfos, Plugin plugin) {
@@ -245,7 +285,7 @@ public class PluginLoader {
 		private PluginDownloadInfo downloadInfo;
 		private DownloadFile currentDownloadFile;
 		private Plugin currentPlugin;
-		private boolean inPlugin;
+		private boolean inDependsOnPlugin;
 
 		@Override
 		public void startDocument() throws SAXException {
@@ -265,13 +305,13 @@ public class PluginLoader {
 				currentDownloadFile = new DownloadFile();
 			} else if (qName.equals("dependsOnPlugin")) {
 				currentPlugin = new Plugin();
-				inPlugin = true;
+				inDependsOnPlugin = true;
 			}
 		}
 
 		@Override
 		public void endElement(String uri, String localName, String qName) {
-			if (inPlugin) {
+			if (inDependsOnPlugin) {
 				if (qName.equals("name")) {
 					currentPlugin.setName(currentValue);
 				} else if (qName.equals("version")) {
@@ -279,12 +319,14 @@ public class PluginLoader {
 				} else if (qName.equals("dependsOnPlugin")) {
 					downloadInfo.dependsOns.add(currentPlugin);
 					currentPlugin = null;
-					inPlugin = false;
+					inDependsOnPlugin = false;
 				}
 			} else if (qName.equals("name")) {
 				downloadInfo.name = currentValue;
 			} else if (qName.equals("version")) {
 				downloadInfo.version = currentValue;
+			} else if (qName.equals("description")) {
+				downloadInfo.description = currentValue;
 			} else if (qName.equals("from")) {
 				currentDownloadFile.downloadFrom = currentValue;
 			} else if (qName.equals("to")) {
@@ -300,10 +342,60 @@ public class PluginLoader {
 		}
 	}
 
+	private class PluginListHandler extends DefaultHandler {
+		private String currentValue;
+		private List<PluginDownloadInfo> downloadInfos;
+		private PluginDownloadInfo currentPlugin;
+
+		@Override
+		public void startDocument() throws SAXException {
+			downloadInfos = new ArrayList<PluginDownloadInfo>();
+		}
+
+		@Override
+		public void characters(char[] ch, int offset, int length) {
+			currentValue = new String(ch, offset, length).trim();
+		}
+
+		@Override
+		public void startElement(String uri, String localName, String qName, org.xml.sax.Attributes attributes) throws SAXException {
+			if (qName.equals("plugin")) {
+				currentPlugin = new PluginDownloadInfo();
+			}
+		}
+
+		@Override
+		public void endElement(String uri, String localName, String qName) {
+			if (qName.equals("name")) {
+				currentPlugin.setName(currentValue);
+			} else if (qName.equals("version")) {
+				currentPlugin.setVersion(currentValue);
+			} else if (qName.equals("description")) {
+				currentPlugin.setDescription(currentValue);
+			} else if (qName.equals("plugin")) {
+				downloadInfos.add(currentPlugin);
+			}
+		}
+
+		public List<PluginDownloadInfo> getPluginDownloadInfos() {
+			return downloadInfos;
+		}
+	}
+
 	public class PluginDownloadInfo {
 		public String name;
 		public String version;
+		public String description;
 		public List<DownloadFile> downloadFiles;
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
 		public List<Plugin> dependsOns;
 
 		public String getName() {

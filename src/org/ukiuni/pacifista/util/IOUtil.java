@@ -1,5 +1,6 @@
 package org.ukiuni.pacifista.util;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,5 +23,16 @@ public class IOUtil {
 				buffer = new byte[(int) (fileSize - readedSize)];
 			}
 		}
+	}
+
+	public static void close(Closeable out) {
+		if (out != null) {
+			try {
+				out.close();
+			} catch (Throwable e) {
+				// Do nothing;
+			}
+		}
+
 	}
 }

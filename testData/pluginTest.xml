@@ -4,8 +4,8 @@
 	<version>v0.0.1</version>
 	<downloadFiles>
 		<downloadFile>
-			<from>http://ftp.yz.yamagata-u.ac.jp/pub/network/apache//commons/cli/binaries/commons-cli-1.2-bin.zip</from>
-			<to>testData/commons-cli-1.2-bin.zip</to>
+			<from>https://dl-web.dropbox.com/s/cr7supvcezpwhlk/samplePlugin.jar</from>
+			<to>testData/samplePlugin.jar</to>
 		</downloadFile>
 	</downloadFiles>
 	<dependsPlugins>

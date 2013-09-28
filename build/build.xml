@@ -4,7 +4,7 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir=".." default="create_zip" name="Pacifista">
+<project basedir=".." default="create_archive" name="Pacifista">
 	<property environment="env" />
 	<property name="junit.output.dir" value="junit" />
 	<property name="debuglevel" value="source,lines,vars" />
@@ -15,13 +15,19 @@
 	<property name="version" value="${major.minor}.${next.build.number}" />
 	<path id="Pacifista.classpath">
 		<pathelement location="compiled" />
-		<pathelement location="libs/asm-4.0.jar" />
-		<pathelement location="libs/groovy-all-2.1.6.jar" />
-		<pathelement location="libs/jruby.jar" />
-		<pathelement location="libs/jsch-0.1.50.jar" />
-		<pathelement location="libs/velocity-1.7-dep.jar" />
+        <pathelement location="libs/asm-4.0.jar"/>
+        <pathelement location="libs/jsch-0.1.50.jar"/>
+        <pathelement location="libs/velocity-1.7-dep.jar"/>
+        <pathelement location="libs/org.eclipse.jgit-3.0.0.201306101825-r.jar"/>
+        <pathelement location="libs/commons-compress-1.5.jar"/>
+        <pathelement location="libs/commons-codec-1.7.jar"/>
+        <pathelement location="libs/aws/aws-java-sdk-1.5.6.jar"/>
+        <pathelement location="libs/aws/commons-codec-1.3.jar"/>
+        <pathelement location="libs/aws/commons-logging-1.1.1.jar"/>
+        <pathelement location="libs/aws/httpclient-4.2.3.jar"/>
+        <pathelement location="libs/aws/httpcore-4.2.jar"/>
 	</path>
-	<target name="init">
+	<target name="init" depends="clean">
 		<mkdir dir="compiled" />
 		<copy includeemptydirs="false" todir="compiled">
 			<fileset dir="src">
@@ -44,10 +50,9 @@
 	</target>
 	<target name="clean">
 		<delete dir="compiled" />
+		<delete file="bin/*.zip" />
+		<delete file="bin/*.tar.gz" />
 	</target>
-	<target depends="clean" name="cleanall" />
-	<target depends="build-subprojects,build-project" name="build" />
-	<target name="build-subprojects" />
 	<target depends="init" name="build-project">
 		<echo message="${ant.project.name}: ${ant.file}" />
 		<javac debug="true" debuglevel="${debuglevel}" destdir="compiled" includeantruntime="false" source="${source}" target="${target}">
@@ -124,8 +129,27 @@ java -cp %basePath%\pasifista.${version}.jar;%basePath%\template;%basePath%\..\l
 		<chmod file="bin/pacifista.bat" perm="ugo+rx" />
 	</target>
 
-	<target depends="create_run_jar" name="create_zip">
-		<zip destfile="bin/pacifista.${version}.zip" basedir="." excludes="build/,compiled/,test/,data/,sampleScripts/,templates/*.vm,plugins/*.jar,scripts/*.js,testData/,testingScripts/,META-INF/">
+	<target depends="create_run_jar" name="create_archive">
+		<zip destfile="bin/pacifista.${version}.zip" basedir="." excludes="build/,compiled/,test/,data/,sampleScripts/,templates/*.vm,plugins/*.jar,scripts/*.js,bin/*.zip,bin/*.tar.gz,testData/,testingScripts/,META-INF/">
 		</zip>
+		<tar compression="gzip" destfile="bin/pacifista.${version}.tar.gz" >
+			<tarfileset dir="." mode="0755">
+				<include name="bin/pacifista" />
+			</tarfileset>
+			<tarfileset dir="." mode="0755">
+				<include name="bin/pacifista" />
+			</tarfileset>
+			<tarfileset dir="." mode="0755">
+				<include name="bin/pacifista" />
+				<include name="bin/pacifista.bat" />
+				<include name="bin/pacifista.${version}.jar" />
+				<include name="libs/*" />
+				<include name="libs/*/*.*" />
+				<include name="plugins/*" />
+				<include name="scripts/*" />
+				<include name="templates/*" />
+				<include name="vmimages/*" />
+			</tarfileset>
+		</tar>
 	</target>
 </project>

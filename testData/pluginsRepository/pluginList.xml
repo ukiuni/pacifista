@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins> 
+	<plugin>
+		<name>ruby</name>
+		<version>1.9</version>
+		<description>This plugin is able to write script with ruby</description>
+	</plugin> 
+	<plugin>
+		<name>groovy</name>
+		<version>2.1.6</version>
+		<description>This plugin is able to write script with groovy\nThis plugin is groovy its own. groovy is licensed under ASL2.0</description>
+	</plugin> 
+	<plugin>
+		<name>python</name>
+		<version>2.5.3</version>
+		<description>This plugin is able to write script with python\nThis plugin is jython its own. jython is licensed under The Jython License (http://www.jython.org/license.html)</description>
+	</plugin>
+</plugins>

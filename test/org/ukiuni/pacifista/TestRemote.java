@@ -103,4 +103,30 @@ public class TestRemote {
 		remote.connect("virtualhost", 22, "user", "password");
 		remote.sendFile("data/zabbix.repo", "/tmp/", "zabbix.repo");
 	}
+
+	@Test
+	public void testRecieve() throws IOException {
+		Remote remote = new Remote(new File("."));
+		remote.connect("virtualhost", 22, "root", "password99!");
+		remote.recieve("/etc/hosts", "testData/testDir");
+		Assert.assertTrue(new File("testData/testDir", "hosts").isFile());
+		new Local(new File(".")).remove("testData/testDir");
+		;
+	}
+
+	@Test
+	public void testReplace() throws IOException {
+		Remote remote = new Remote(new File("."));
+		remote.connect("virtualhost", 22, "root", "password99!");
+		String srcLine = "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4";
+		String destLine = "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 virtualhost";
+		remote.replaceLine("/etc/hosts", srcLine, destLine);
+		String fileTestDir = "testData/testData";
+		remote.recieve("/etc/hosts", fileTestDir);
+		String replacedFile = new Local(new File(".")).load(fileTestDir + "/hosts");
+		Assert.assertEquals(destLine + "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6", replacedFile.replace("\r", "").replace("\n", ""));
+		remote.replaceLine("/etc/hosts", destLine, srcLine);
+		new File(fileTestDir, "hosts").delete();
+		new File(fileTestDir).delete();
+	}
 }

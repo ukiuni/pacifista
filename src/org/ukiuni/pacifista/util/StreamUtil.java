@@ -51,6 +51,14 @@ public class StreamUtil {
 		}
 
 		@Override
+		public void close() throws IOException {
+			synchronized (outToIn) {
+				outToIn.notifyAll();
+			}
+			super.close();
+		}
+
+		@Override
 		public int read() throws IOException {
 			synchronized (outToIn) {
 				if (outToIn.isEmpty()) {

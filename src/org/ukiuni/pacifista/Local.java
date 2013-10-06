@@ -1,14 +1,22 @@
 package org.ukiuni.pacifista;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.UUID;
 
+import org.ukiuni.pacifista.util.FileUtil;
 import org.ukiuni.pacifista.util.IOUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
+import org.ukiuni.pacifista.util.TarUtil;
+import org.ukiuni.pacifista.util.ZipUtil;
 
 public class Local {
 	private final File baseDir;
@@ -269,14 +277,90 @@ public class Local {
 	}
 
 	public void downloadAsFile(String url, String path, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
-		File file;
-		if (path.startsWith("/")) {
-			file = new File(path);
-		} else {
-			file = new File(baseDir, path);
-		}
+		File file = FileUtil.pathToFile(baseDir, path);
 		FileOutputStream out = new FileOutputStream(file);
 		Http.download(url, out);
 		out.close();
+	}
+
+	public void decompress(String filePath, String outDirectoryPath) throws IOException {
+		if (filePath.endsWith(".tar.gz") || filePath.endsWith(".tgz")) {
+			unTarGz(filePath, outDirectoryPath);
+		} else if (filePath.endsWith(".tar.bz2") || filePath.endsWith(".tbz")) {
+			unTarBz2(filePath, outDirectoryPath);
+		} else if (filePath.endsWith(".zip")) {
+			unzip(filePath, outDirectoryPath);
+		} else {
+			throw new IOException("unknown archive format " + filePath);
+		}
+	}
+
+	public void unzip(String zipFilePath, String outDirectoryPath) throws IOException {
+		File zipFile = FileUtil.pathToFile(baseDir, zipFilePath);
+		File outDirectory = FileUtil.pathToFile(baseDir, outDirectoryPath);
+		outDirectory.mkdirs();
+		ZipUtil.unzip(zipFile, outDirectory);
+	}
+
+	public void unTarGz(String tarGzFilePath, String outDirectoryPath) throws IOException {
+		File tarGzFile = FileUtil.pathToFile(baseDir, tarGzFilePath);
+		File outDirectory = FileUtil.pathToFile(baseDir, outDirectoryPath);
+		outDirectory.mkdirs();
+		TarUtil.unTarGz(tarGzFile, outDirectory);
+	}
+
+	public void unTarBz2(String tarGzFilePath, String outDirectoryPath) throws IOException {
+		File tarGzFile = FileUtil.pathToFile(baseDir, tarGzFilePath);
+		File outDirectory = FileUtil.pathToFile(baseDir, outDirectoryPath);
+		outDirectory.mkdirs();
+		TarUtil.unTarBz2(tarGzFile, outDirectory);
+	}
+
+	public void unTar(String tarGzFilePath, String outDirectoryPath) throws IOException {
+		File tarGzFile = FileUtil.pathToFile(baseDir, tarGzFilePath);
+		File outDirectory = FileUtil.pathToFile(baseDir, outDirectoryPath);
+		outDirectory.mkdirs();
+		TarUtil.unTar(tarGzFile, outDirectory);
+	}
+
+	public void zip(String directoryPath, String zipFilePath) throws IOException {
+		File directory = FileUtil.pathToFile(baseDir, directoryPath);
+		File zipFile = FileUtil.pathToFile(baseDir, zipFilePath);
+		OutputStream out = null;
+		try {
+			out = new FileOutputStream(zipFile);
+			ZipUtil.zip(directory, out);
+			out.close();
+		} catch (Exception e) {
+			IOUtil.close(out);
+			zipFile.delete();
+		}
+	}
+
+	public void replaceLine(String filePath, String target, String replaceTo) throws IOException, FileNotFoundException {
+		replaceLine(filePath, target, replaceTo, "UTF-8");
+	}
+
+	public void replaceLine(String filePath, String target, String replaceTo, String encode) throws IOException, FileNotFoundException {
+		File file = FileUtil.pathToFile(baseDir, filePath);
+		replaceLine(file, target, replaceTo, encode);
+	}
+
+	public void replaceLine(File file, String target, String replaceTo, String encode) throws IOException, FileNotFoundException {
+		String tmpFileName = UUID.randomUUID().toString();
+		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), encode));
+		String line = in.readLine();
+		PrintStream out = new PrintStream(new FileOutputStream(tmpFileName), false, encode);
+		while (null != line) {
+			if (line.equals(target)) {
+				line = replaceTo;
+			}
+			out.println(line);
+			line = in.readLine();
+		}
+		out.close();
+		in.close();
+		file.delete();
+		new File(tmpFileName).renameTo(file);
 	}
 }

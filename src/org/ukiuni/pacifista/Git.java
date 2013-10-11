@@ -10,9 +10,11 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 public class Git {
 	private File baseDir;
+	private Runtime runtime;
 
-	public Git(File baseDir) {
+	public Git(File baseDir, Runtime runtime) {
 		this.baseDir = baseDir;
+		this.runtime = runtime;
 	}
 
 	public void clone(String path, String to) throws InvalidRemoteException, TransportException, GitAPIException {

@@ -4,9 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.junit.Test;
 import org.ukiuni.pacifista.Local;
+import org.ukiuni.pacifista.Runtime;
 
 public class TestZipUtil {
 
@@ -21,7 +23,7 @@ public class TestZipUtil {
 			assertTrue(new File(targetDirectory, "html/controll/stopAccepted.html").isFile());
 			assertTrue(new File(targetDirectory, "html/front/index.html").isFile());
 		} finally {
-			new Local(new File(".")).remove(targetDirectory);
+			new Local(new File("."), new Runtime(new File("."), new File("templates"), new File("plugins"), new HashMap<String, Object>())).remove(targetDirectory);
 		}
 	}
 }

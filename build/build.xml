@@ -135,11 +135,11 @@ java -cp %basePath%\pasifista.${version}.jar;%basePath%\template;%basePath%\..\l
 		<tar compression="gzip" destfile="bin/pacifista.${version}.tar.gz" >
 			<tarfileset dir="." mode="0755">
 				<include name="bin/pacifista" />
+				<include name="bin/pacifista.${version}.jar" />
 			</tarfileset>
 			<tarfileset dir=".">
-				<include name="bin/pacifista" />
 				<include name="bin/pacifista.bat" />
-				<include name="bin/pacifista.${version}.jar" />
+				<include name="assets/*" />
 				<include name="libs/*" />
 				<include name="libs/*/*.*" />
 				<include name="plugins/*" />

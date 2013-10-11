@@ -107,13 +107,14 @@ public class ScriptingUtil {
 		if (null == scriptEngine) {
 			throw new ScriptEngineNotFoundException(lang);
 		}
-		scriptEngine.put("Remote", new RemoteFactory(baseDir));
+		Runtime runtime = new Runtime(baseDir, templateDir, pluginDir, parameters);
+		scriptEngine.put("Remote", new RemoteFactory(baseDir, runtime));
 		scriptEngine.put("Template", new VelocityWrapper(templateDir));
 		scriptEngine.put("console", new Console());
-		scriptEngine.put("runtime", new Runtime(baseDir, templateDir, pluginDir, parameters));
+		scriptEngine.put("runtime", runtime);
 		scriptEngine.put("Tester", new Tester());
-		scriptEngine.put("local", new Local(baseDir));
-		scriptEngine.put("git", new Git(baseDir));
+		scriptEngine.put("local", new Local(baseDir, runtime));
+		scriptEngine.put("git", new Git(baseDir, runtime));
 		scriptEngine.put("VirtualMachine", new VirtualMachine(baseDir));
 		scriptEngine.put("VirtualMacine", new VirtualMachine(baseDir));
 

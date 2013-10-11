@@ -39,9 +39,11 @@ public class Remote {
 	private String host;
 	private PrintStream out = System.out;
 	private String promptCharacter = "#";
+	private Runtime runtime;
 
-	public Remote(File baseDir) {
+	public Remote(File baseDir, Runtime runtime) {
 		this.baseDir = baseDir;
+		this.runtime = runtime;
 	}
 
 	protected void setProxy(String host, int port) {
@@ -101,12 +103,7 @@ public class Remote {
 	}
 
 	public void connectWithAuthFile(String host, int port, String account, String authFilePath) throws IOException {
-		File authFile;
-		if (authFilePath.startsWith("/")) {
-			authFile = new File(authFilePath);
-		} else {
-			authFile = new File(baseDir, authFilePath);
-		}
+		File authFile = FileUtil.pathToFile(baseDir, authFilePath);
 		this.connect(host, port, account, null, authFile);
 	}
 
@@ -150,6 +147,12 @@ public class Remote {
 			}
 			if (proxy != null) {
 				this.session.setProxy(proxy);
+			}
+			if (null != runtime.getEnv("socksProxyHost")) {
+				ProxySOCKS5 proxy = new ProxySOCKS5((String) runtime.getEnv("socksProxyHost"), Integer.valueOf((String) runtime.getEnv("socksProxyPort")));
+				if (null != runtime.getEnv("socksProxyUser")) {
+					proxy.setUserPasswd((String) runtime.getEnv("socksProxyUser"), (String) runtime.getEnv("socksProxyPassword"));
+				}
 			}
 			for (int i = 0; i < 10; i++) {
 				try {
@@ -371,7 +374,7 @@ public class Remote {
 	}
 
 	public void replaceLine(String remoteFilePath, String replaceFrom, String replaceTo) throws IOException {
-		replaceLine(remoteFilePath, replaceFrom, replaceTo, "UTF-8");
+		replaceLine(remoteFilePath, replaceFrom, replaceTo, encode);
 	}
 
 	public void replaceLine(String remoteFilePath, String replaceFrom, String replaceTo, String encode) throws IOException {
@@ -381,12 +384,47 @@ public class Remote {
 		this.recieve(remoteFilePath, tmpDir);
 		DirectoryPartAndFileName dpafn = FileUtil.dividePathToParentDirectoryAndFileName(remoteFilePath);
 		File targetFile = new File(tmpDir, dpafn.getFileName());
-		new Local(baseDir).replaceLine(targetFile, replaceFrom, replaceTo, encode);
+		new Local(baseDir, runtime).replaceLine(targetFile, replaceFrom, replaceTo, encode);
 		this.send(targetFile, dpafn.getDirectoryPart(), dpafn.getFileName());
-		new Local(baseDir).remove(tmpDir);
+		new Local(baseDir, runtime).remove(tmpDir);
+	}
+
+	public void comment(String remoteFilePath, String target) throws IOException {
+		comment(remoteFilePath, target, encode);
+	}
+
+	public void comment(String remoteFilePath, String target, String encode) throws IOException {
+		String localTmpDirName = UUID.randomUUID().toString();
+		File tmpDir = new File(localTmpDirName);
+		tmpDir.mkdirs();
+		this.recieve(remoteFilePath, tmpDir);
+		DirectoryPartAndFileName dpafn = FileUtil.dividePathToParentDirectoryAndFileName(remoteFilePath);
+		File targetFile = new File(tmpDir, dpafn.getFileName());
+		new Local(baseDir, runtime).comment(targetFile, target, encode);
+		this.send(targetFile, dpafn.getDirectoryPart(), dpafn.getFileName());
+		new Local(baseDir, runtime).remove(tmpDir);
+	}
+
+	public void uncomment(String remoteFilePath, String target) throws IOException {
+		uncomment(remoteFilePath, target, encode);
+	}
+
+	public void uncomment(String remoteFilePath, String target, String encode) throws IOException {
+		String localTmpDirName = UUID.randomUUID().toString();
+		File tmpDir = new File(localTmpDirName);
+		tmpDir.mkdirs();
+		this.recieve(remoteFilePath, tmpDir);
+		DirectoryPartAndFileName dpafn = FileUtil.dividePathToParentDirectoryAndFileName(remoteFilePath);
+		File targetFile = new File(tmpDir, dpafn.getFileName());
+		new Local(baseDir, runtime).uncomment(targetFile, target, encode);
+		this.send(targetFile, dpafn.getDirectoryPart(), dpafn.getFileName());
+		new Local(baseDir, runtime).remove(tmpDir);
 	}
 
 	public Shell startShell() throws IOException {
+		if (null == this.session) {
+			throw new RuntimeException("connect before start shell");
+		}
 		try {
 			ChannelShell channel = (ChannelShell) this.session.openChannel("shell");
 			Shell shell = new Shell(channel);
@@ -398,6 +436,9 @@ public class Remote {
 	}
 
 	public Shell startShell(int readWaitTime) throws IOException {
+		if (null == this.session) {
+			throw new RuntimeException("connect before start shell");
+		}
 		try {
 			ChannelShell channel = (ChannelShell) this.session.openChannel("shell");
 			Shell shell = new Shell(channel, readWaitTime);
@@ -441,6 +482,7 @@ public class Remote {
 			Remote.this.out.println(execute(command));
 		}
 
+		@SuppressWarnings("unused")
 		public String execute(String command) throws IOException {
 			byte[] sendCommandBytes = (command + "\n").getBytes(encode);
 			this.out.write(sendCommandBytes);

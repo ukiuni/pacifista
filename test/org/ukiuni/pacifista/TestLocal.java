@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class TestLocal {
 		out.println("test non replace line2");
 		out.println("test replace line");
 		out.close();
-		new Local(new File(".")).replaceLine(targetFileName, "test replace line", "replaced");
+		new Local(new File("."), new Runtime(new File("."), new File("templates"), new File("plugins"), new HashMap<String, Object>())).replaceLine(targetFileName, "test replace line", "replaced");
 		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 		Assert.assertEquals("test non replace line1", in.readLine());
 		Assert.assertEquals("replaced", in.readLine());

@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.ukiuni.pacifista.util.FileUtil;
 import org.ukiuni.pacifista.util.IOUtil;
@@ -21,9 +22,11 @@ import org.ukiuni.pacifista.util.ZipUtil;
 public class Local {
 	private final File baseDir;
 	private PrintStream out = System.out;
+	private Runtime runtime;
 
-	public Local(File baseDir) {
+	public Local(File baseDir, Runtime runtime) {
 		this.baseDir = baseDir;
+		this.runtime = runtime;
 	}
 
 	/**
@@ -259,11 +262,15 @@ public class Local {
 	}
 
 	public String download(String url, String encode) throws IOException {
-		return download(url, encode, null, 0, null, null);
+		String proxyHost = (String) runtime.getEnv("httpProxyHost");
+		int proxyPort = null == runtime.getEnv("httpProxyPort") ? 0 : Integer.parseInt((String) runtime.getEnv("httpProxyPort"));
+		String proxyUser = (String) runtime.getEnv("httpProxyUser");
+		String proxyPassword = (String) runtime.getEnv("httpProxyPassword");
+		return download(url, encode, proxyHost, proxyPort, proxyUser, proxyPassword);
 	}
 
 	public String download(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
-		return download(url, "UTF-8", null, 0, null, null);
+		return download(url, "UTF-8", proxyHost, proxyPort, proxyUser, proxyPass);
 	}
 
 	public String download(String url, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
@@ -337,24 +344,102 @@ public class Local {
 		}
 	}
 
-	public void replaceLine(String filePath, String target, String replaceTo) throws IOException, FileNotFoundException {
-		replaceLine(filePath, target, replaceTo, "UTF-8");
-	}
-
-	public void replaceLine(String filePath, String target, String replaceTo, String encode) throws IOException, FileNotFoundException {
+	public void comment(String filePath, String replaceLine) throws FileNotFoundException, IOException {
 		File file = FileUtil.pathToFile(baseDir, filePath);
-		replaceLine(file, target, replaceTo, encode);
+		comment(file, replaceLine);
 	}
 
-	public void replaceLine(File file, String target, String replaceTo, String encode) throws IOException, FileNotFoundException {
+	public void comment(File file, String replaceLine) throws FileNotFoundException, IOException {
+		comment(file, replaceLine, "UTF-8");
+	}
+
+	public void comment(String filePath, final String replaceLine, String encode) throws FileNotFoundException, IOException {
+		File file = FileUtil.pathToFile(baseDir, filePath);
+		comment(file, replaceLine, encode);
+	}
+
+	public void comment(File file, final String replaceLine, String encode) throws FileNotFoundException, IOException {
+		final Pattern pattern = Pattern.compile(replaceLine);
+		ReplaceCallback replaceCallback = new ReplaceCallback() {
+			@Override
+			public String replaceTo(String org) {
+				if (pattern.matcher(org).matches()) {
+					return "#" + org;
+				} else {
+					return org;
+				}
+			}
+		};
+		replaceLine(file, replaceCallback, encode);
+	}
+
+	public void uncomment(String filePath, String replaceLine) throws FileNotFoundException, IOException {
+		File file = FileUtil.pathToFile(baseDir, filePath);
+		uncomment(file, replaceLine);
+
+	}
+
+	public void uncomment(File file, String replaceLine) throws FileNotFoundException, IOException {
+		comment(file, replaceLine, "UTF-8");
+	}
+
+	public void uncomment(String filePath, final String replaceLine, String encode) throws FileNotFoundException, IOException {
+		File file = FileUtil.pathToFile(baseDir, filePath);
+		comment(file, replaceLine, encode);
+	}
+
+	public void uncomment(File file, final String replaceLine, String encode) throws FileNotFoundException, IOException {
+		final Pattern pattern = Pattern.compile(replaceLine);
+		ReplaceCallback replaceCallback = new ReplaceCallback() {
+			@Override
+			public String replaceTo(String org) {
+				if (org.startsWith("#") && org.length() >= 2 && pattern.matcher(org.substring(1)).matches()) {
+					return org.substring(1);
+				} else {
+					return org;
+				}
+			}
+		};
+		replaceLine(file, replaceCallback, encode);
+	}
+
+	public void replaceLine(String filePath, String replaceFrom, String replaceTo) throws IOException, FileNotFoundException {
+		replaceLine(filePath, replaceFrom, replaceTo, "UTF-8");
+	}
+
+	public void replaceLine(String filePath, String replaceFrom, String replaceTo, String encode) throws IOException, FileNotFoundException {
+		File file = FileUtil.pathToFile(baseDir, filePath);
+		replaceLine(file, replaceFrom, replaceTo, encode);
+	}
+
+	public void replaceLine(File file, String replaceFrom, final String replaceTo, String encode) throws IOException, FileNotFoundException {
+		final Pattern pattern = Pattern.compile(replaceFrom);
+		ReplaceCallback replaceCallback = new ReplaceCallback() {
+			@Override
+			public String replaceTo(String org) {
+				if (pattern.matcher(org).matches()) {
+					return replaceTo;
+				} else {
+					return org;
+				}
+			}
+		};
+		replaceLine(file, replaceCallback, encode);
+	}
+
+	private static interface ReplaceCallback {
+		public String replaceTo(String org);
+	}
+
+	public void replaceLine(File file, ReplaceCallback replaceCallback, String encode) throws IOException, FileNotFoundException {
 		String tmpFileName = UUID.randomUUID().toString();
 		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), encode));
 		String line = in.readLine();
 		PrintStream out = new PrintStream(new FileOutputStream(tmpFileName), false, encode);
+
 		while (null != line) {
-			if (line.equals(target)) {
-				line = replaceTo;
-			}
+			line = replaceCallback.replaceTo(line);
+
 			out.println(line);
 			line = in.readLine();
 		}

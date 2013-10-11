@@ -86,8 +86,8 @@ public class VirtualBoxHost implements VirtualHost {
 	@Override
 	public boolean isExist() throws IOException, InterruptedException {
 		try {
-			Local.execute(new String[] { "VBoxManage", "showvminfo", host });
-			return true;
+			String line = Local.execute(new String[] { "VBoxManage", "showvminfo", host });
+			return !line.contains("Could not find a registered machine");
 		} catch (Throwable e) {
 			return false;
 		}

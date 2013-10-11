@@ -1,4 +1,0 @@
-test non replace line1
-replaced
-test non replace line2
-replaced

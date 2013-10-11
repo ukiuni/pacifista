@@ -41,7 +41,7 @@ public class TestScriptUtil {
 		String lsValue = "drwxr-xr-x. 64 root root 4096 2013/09/01 22:22:06 /etc/";
 		LsResult lsResult = ScriptingUtil.parseLs(lsValue);
 		Assert.assertEquals(true, lsResult.isDir);
-		Assert.assertEquals("rw-r--r--", lsResult.mode);
+		Assert.assertEquals("rwxr-xr-x", lsResult.mode);
 		Assert.assertEquals("root", lsResult.group);
 		Assert.assertEquals("root", lsResult.owner);
 		Assert.assertEquals(4096, lsResult.size);

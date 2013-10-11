@@ -14,6 +14,7 @@ import java.util.List;
 public class RemoteFactory {
 	private static List<Remote> remotes = new ArrayList<Remote>();
 	private File baseDir;
+	private Runtime runtime;
 
 	/**
 	 * Constructor, for pacifista platform.
@@ -21,8 +22,9 @@ public class RemoteFactory {
 	 * @param baseDir
 	 *            execute path
 	 */
-	public RemoteFactory(File baseDir) {
+	public RemoteFactory(File baseDir, Runtime runtime) {
 		this.baseDir = baseDir;
+		this.runtime = runtime;
 	}
 
 	/**
@@ -31,7 +33,7 @@ public class RemoteFactory {
 	 * @return
 	 */
 	public Remote create() {
-		Remote remote = new Remote(baseDir);
+		Remote remote = new Remote(baseDir, runtime);
 		remotes.add(remote);
 		return remote;
 	}

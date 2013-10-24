@@ -456,12 +456,12 @@ public class Remote {
 		private String lang = "ja_JP.UTF-8";
 		private int readWaitTime = 1000;
 
-		public Shell(ChannelShell channel, int readWaitTime) throws IOException {
-			this(channel);
-			this.readWaitTime = readWaitTime;
+		public Shell(ChannelShell channel) throws IOException {
+			this(channel, 1000);
 		}
 
-		public Shell(ChannelShell channel) throws IOException {
+		public Shell(ChannelShell channel, int readWaitTime) throws IOException {
+			this.readWaitTime = readWaitTime;
 			this.channel = channel;
 			final LinkedList<Integer> outToIn = new LinkedList<Integer>();
 			final LinkedList<Integer> inToOut = new LinkedList<Integer>();

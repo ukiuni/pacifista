@@ -1,42 +1,51 @@
 package org.ukiuni.pacifista;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Authenticator;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.ukiuni.pacifista.util.IOUtil;
 
 public class Http {
-	public static void download(String url, OutputStream out) throws IOException {
-		download(url, out, null, 0, null, null);
+	private Local local;
+
+	public Http(Local local) {
+		this.local = local;
 	}
 
-	public static URLConnection openConnection(String url, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
-		if (null == proxyHost) {
-			return new URL(url).openConnection();
-		} else {
-			URLConnection connection = new URL(url).openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
-			if (null != proxyUser && null != proxyPass) {
-				Authenticator.setDefault(new Authenticator() {
-					@Override
-					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(proxyUser, proxyPass.toCharArray());
-					}
-				});
-			}
-			return connection;
-		}
+	public String get(String url) throws IOException {
+		return this.local.download(url);
 	}
 
-	public static void download(String url, OutputStream out, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
-		InputStream in = openConnection(url, proxyHost, proxyPort, proxyUser, proxyPass).getInputStream();
-		IOUtil.copy(in, out);
-		in.close();
+	public String get(String url, String encode) throws IOException {
+		return this.local.download(url, encode);
+	}
+
+	public String get(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+		return this.local.httpRequest(url, "GET", "UTF-8", proxyHost, proxyPort, proxyUser, proxyPass);
+	}
+
+	public String get(String url, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+		return this.local.httpRequest(url, "POST", encode, proxyHost, proxyPort, proxyUser, proxyPass);
+	}
+
+	public String post(String url) throws IOException {
+		return this.local.download(url);
+	}
+
+	public String post(String url, String encode) throws IOException {
+		return this.local.download(url, encode);
+	}
+
+	public String post(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+		return this.local.httpRequest(url, "POST", "UTF-8", proxyHost, proxyPort, proxyUser, proxyPass);
+	}
+
+	public String post(String url, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+		return this.local.httpRequest(url, "POST", encode, proxyHost, proxyPort, proxyUser, proxyPass);
+	}
+
+	public String request(String url, String method, String encode) throws IOException {
+		return this.local.httpRequest(url, method, encode, null, 0, null, null);
+	}
+
+	public String request(String url, String method, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+		return this.local.httpRequest(url, method, encode, proxyHost, proxyPort, proxyUser, proxyPass);
 	}
 }

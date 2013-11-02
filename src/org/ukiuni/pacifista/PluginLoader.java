@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.ukiuni.pacifista.util.HttpUtil;
+import org.ukiuni.pacifista.util.HttpUtil.HttpMethod;
 import org.ukiuni.pacifista.util.IOUtil;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -45,7 +47,7 @@ public class PluginLoader {
 					file.getParentFile().mkdirs();
 					FileOutputStream out = new FileOutputStream(file);
 					try {
-						Http.download(downloadFile.downloadFrom, out, proxyHost, proxyPort, proxyUser, proxyPassword);
+						HttpUtil.download(downloadFile.downloadFrom, out, proxyHost, proxyPort, proxyUser, proxyPassword);
 						downloadedFiles.add(file);
 					} catch (IOException e) {
 						IOUtil.close(out);
@@ -102,7 +104,7 @@ public class PluginLoader {
 	}
 
 	public void loadPluginInfo(String urlPath, Set<PluginDownloadInfo> pluginDownloadInfos, boolean loadDependsOn, String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
-		URLConnection connection = Http.openConnection(urlPath, proxyHost, proxyPort, proxyUser, proxyPassword);
+		URLConnection connection = HttpUtil.openConnection(urlPath, HttpMethod.GET, proxyHost, proxyPort, proxyUser, proxyPassword);
 		if (connection instanceof HttpURLConnection && 300 <= ((HttpURLConnection) connection).getResponseCode()) {
 			throw new IOException("response code is " + ((HttpURLConnection) connection).getResponseCode());
 		}
@@ -131,7 +133,7 @@ public class PluginLoader {
 	}
 
 	public List<PluginDownloadInfo> loadAllPluginInfos(String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
-		URLConnection connection = Http.openConnection(getPluginHostUrl(), proxyHost, proxyPort, proxyUser, proxyPassword);
+		URLConnection connection = HttpUtil.openConnection(getPluginHostUrl(), HttpMethod.GET, proxyHost, proxyPort, proxyUser, proxyPassword);
 		if (connection instanceof HttpURLConnection && 300 <= ((HttpURLConnection) connection).getResponseCode()) {
 			throw new IOException("response code is " + ((HttpURLConnection) connection).getResponseCode());
 		}

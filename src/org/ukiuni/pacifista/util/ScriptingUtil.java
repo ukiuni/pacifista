@@ -23,6 +23,7 @@ import javax.script.ScriptException;
 
 import org.ukiuni.pacifista.Console;
 import org.ukiuni.pacifista.Git;
+import org.ukiuni.pacifista.Http;
 import org.ukiuni.pacifista.Local;
 import org.ukiuni.pacifista.PluginLoader;
 import org.ukiuni.pacifista.PluginLoader.Plugin;
@@ -113,7 +114,9 @@ public class ScriptingUtil {
 		scriptEngine.put("console", new Console());
 		scriptEngine.put("runtime", runtime);
 		scriptEngine.put("Tester", new Tester());
-		scriptEngine.put("local", new Local(baseDir, runtime));
+		Local local = new Local(baseDir, runtime);
+		scriptEngine.put("local", local);
+		scriptEngine.put("http", new Http(local));
 		scriptEngine.put("git", new Git(baseDir, runtime));
 		scriptEngine.put("VirtualMachine", new VirtualMachine(baseDir));
 		scriptEngine.put("VirtualMacine", new VirtualMachine(baseDir));

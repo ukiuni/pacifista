@@ -13,7 +13,10 @@ import java.io.PrintStream;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.apache.http.protocol.HTTP;
 import org.ukiuni.pacifista.util.FileUtil;
+import org.ukiuni.pacifista.util.HttpUtil;
+import org.ukiuni.pacifista.util.HttpUtil.HttpMethod;
 import org.ukiuni.pacifista.util.IOUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
 import org.ukiuni.pacifista.util.TarUtil;
@@ -262,20 +265,24 @@ public class Local {
 	}
 
 	public String download(String url, String encode) throws IOException {
+		return httpRequest(url, "GET", encode);
+	}
+
+	public String httpRequest(String url, String httpMethod, String encode) throws IOException {
 		String proxyHost = (String) runtime.getEnv("httpProxyHost");
 		int proxyPort = null == runtime.getEnv("httpProxyPort") ? 0 : Integer.parseInt((String) runtime.getEnv("httpProxyPort"));
 		String proxyUser = (String) runtime.getEnv("httpProxyUser");
 		String proxyPassword = (String) runtime.getEnv("httpProxyPassword");
-		return download(url, encode, proxyHost, proxyPort, proxyUser, proxyPassword);
+		return httpRequest(url, httpMethod, encode, proxyHost, proxyPort, proxyUser, proxyPassword);
 	}
 
-	public String download(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
-		return download(url, "UTF-8", proxyHost, proxyPort, proxyUser, proxyPass);
+	public String download(String url, String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
+		return httpRequest(url, "GET", "UTF-8", proxyHost, proxyPort, proxyUser, proxyPassword);
 	}
 
-	public String download(String url, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
+	public String httpRequest(String url, String httpMethod, String encode, String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		Http.download(url, out);
+		HttpUtil.httpRequest(url, HttpMethod.valueOf(httpMethod), out, proxyHost, proxyPort, proxyUser, proxyPassword);
 		return new String(out.toByteArray(), encode);
 	}
 
@@ -286,7 +293,7 @@ public class Local {
 	public void downloadAsFile(String url, String path, String proxyHost, int proxyPort, String proxyUser, String proxyPass) throws IOException {
 		File file = FileUtil.pathToFile(baseDir, path);
 		FileOutputStream out = new FileOutputStream(file);
-		Http.download(url, out);
+		HttpUtil.download(url, out);
 		out.close();
 	}
 

@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.ukiuni.pacifista.Http;
 import org.ukiuni.pacifista.Local;
+import org.ukiuni.pacifista.util.HttpUtil;
 import org.ukiuni.pacifista.util.ScriptingUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
 
@@ -130,7 +130,7 @@ public class VirtualBoxHost implements VirtualHost {
 		String vmFileName = new File(new URL(url).getFile()).getName();
 		File vmFile = new File(vmdir, vmFileName);
 		FileOutputStream out = new FileOutputStream(vmFile);
-		Http.download(url, out, proxyHost, proxyPort, proxyUser, proxyPass);
+		HttpUtil.download(url, out, proxyHost, proxyPort, proxyUser, proxyPass);
 		out.close();
 		if (vmFile.getName().endsWith(".box")) {
 			TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(vmFile));

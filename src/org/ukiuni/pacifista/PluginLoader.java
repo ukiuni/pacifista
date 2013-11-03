@@ -104,7 +104,7 @@ public class PluginLoader {
 	}
 
 	public void loadPluginInfo(String urlPath, Set<PluginDownloadInfo> pluginDownloadInfos, boolean loadDependsOn, String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
-		URLConnection connection = HttpUtil.openConnection(urlPath, HttpMethod.GET, proxyHost, proxyPort, proxyUser, proxyPassword);
+		URLConnection connection = HttpUtil.openConnection(urlPath, HttpMethod.GET, null, null, proxyHost, proxyPort, proxyUser, proxyPassword);
 		if (connection instanceof HttpURLConnection && 300 <= ((HttpURLConnection) connection).getResponseCode()) {
 			throw new IOException("response code is " + ((HttpURLConnection) connection).getResponseCode());
 		}
@@ -133,7 +133,7 @@ public class PluginLoader {
 	}
 
 	public List<PluginDownloadInfo> loadAllPluginInfos(String proxyHost, int proxyPort, String proxyUser, String proxyPassword) throws IOException {
-		URLConnection connection = HttpUtil.openConnection(getPluginHostUrl(), HttpMethod.GET, proxyHost, proxyPort, proxyUser, proxyPassword);
+		URLConnection connection = HttpUtil.openConnection(getPluginHostUrl(), HttpMethod.GET, null, null, proxyHost, proxyPort, proxyUser, proxyPassword);
 		if (connection instanceof HttpURLConnection && 300 <= ((HttpURLConnection) connection).getResponseCode()) {
 			throw new IOException("response code is " + ((HttpURLConnection) connection).getResponseCode());
 		}

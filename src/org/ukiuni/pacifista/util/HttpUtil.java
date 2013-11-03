@@ -10,8 +10,7 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.ukiuni.pacifista.util.IOUtil;
+import java.util.Map;
 
 public class HttpUtil {
 	public enum HttpMethod {
@@ -22,15 +21,24 @@ public class HttpUtil {
 		download(url, out, null, 0, null, null);
 	}
 
-	public static URLConnection openConnection(String url, HttpMethod method, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+	public static URLConnection openConnection(String url, HttpMethod method, String parameter, Map<String, String> header, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
 		if (null == proxyHost) {
 			return new URL(url).openConnection();
 		} else {
 			HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
+			if (null != header) {
+				for (String key : header.keySet()) {
+					connection.addRequestProperty(key, header.get(key));
+				}
+			}
 			switch (method) {
 			case POST:
 			case PUT:
 				connection.setDoOutput(true);
+				if (null != parameter) {
+					OutputStream out = connection.getOutputStream();
+					out.write(parameter.getBytes("UTF-8"));
+				}
 			case DELETE:
 			case GET:
 				connection.setRequestMethod(method.toString());
@@ -52,7 +60,14 @@ public class HttpUtil {
 	}
 
 	public static void httpRequest(String url, HttpMethod httpMethod, OutputStream out, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
-		InputStream in = openConnection(url, HttpMethod.GET, proxyHost, proxyPort, proxyUser, proxyPass).getInputStream();
+		InputStream in = openConnection(url, HttpMethod.GET, null, null, proxyHost, proxyPort, proxyUser, proxyPass).getInputStream();
+		IOUtil.copy(in, out);
+		Authenticator.setDefault(null);
+		in.close();
+	}
+
+	public static void httpRequest(String url, HttpMethod httpMethod, OutputStream out, String parameter, Map<String, String> header, String proxyHost, int proxyPort, final String proxyUser, final String proxyPass) throws IOException {
+		InputStream in = openConnection(url, HttpMethod.GET, parameter, header, proxyHost, proxyPort, proxyUser, proxyPass).getInputStream();
 		IOUtil.copy(in, out);
 		Authenticator.setDefault(null);
 		in.close();

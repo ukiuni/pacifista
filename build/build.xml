@@ -122,8 +122,8 @@
 binary_path=$(cd $(dirname "$$0"); pwd)
 java -cp "${binary_path}/pacifista.${version}.jar:$${binary_path}/template:$${binary_path}/../libs/*:$${binary_path}/../plugins/*:$${binary_path}/../libs/aws/*" org.ukiuni.pacifista.Main -baseDir $${binary_path}/../ $$1 $$2 $$3 $$4 $$5 $$6 $$7 $$8 $$9
 </echo>
-		<echo file="bin/pacifista.bat">set basePath=%~dp1
-java -cp %basePath%\pasifista.${version}.jar;%basePath%\template;%basePath%\..\libs\*;%basePath%\..\plugins\*;%basePath%\..\libs\aws\* org.ukiuni.pacifista.Main -baseDir %basePath%/../ %1 %2 %3 %4 %5 %6 %7 %8 %9
+		<echo file="bin/pacifista.bat">set basePath=%~dp0
+java -cp %basePath%pacifista.${version}.jar;%basePath%template;%basePath%..\libs\*;%basePath%..\plugins\*;%basePath%..\libs\aws\* org.ukiuni.pacifista.Main -baseDir %basePath%../ %1 %2 %3 %4 %5 %6 %7 %8 %9
 </echo>
 		<chmod file="bin/pacifista" perm="ugo+rx" />
 		<chmod file="bin/pacifista.bat" perm="ugo+rx" />

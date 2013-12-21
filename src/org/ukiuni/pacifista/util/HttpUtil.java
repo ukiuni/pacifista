@@ -36,21 +36,24 @@ public class HttpUtil {
 				});
 			}
 		}
-		connection.setRequestMethod(method.toString());
 		if (null != header) {
 			for (String key : header.keySet()) {
 				connection.addRequestProperty(key, header.get(key));
-				System.out.println("add request property " + key + ":" + header.get(key));
 			}
 		}
-		if (HttpMethod.POST.equals(method) || HttpMethod.PUT.equals(method)) {
+
+		switch (method) {
+		case POST:
+		case PUT:
 			connection.setDoOutput(true);
 			if (null != parameter) {
 				OutputStream out = connection.getOutputStream();
 				out.write(parameter.getBytes("UTF-8"));
 			}
+		case DELETE:
+		case GET:
+			connection.setRequestMethod(method.toString());
 		}
-
 		return connection;
 	}
 

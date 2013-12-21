@@ -13,7 +13,6 @@ import java.io.PrintStream;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.http.protocol.HTTP;
 import org.ukiuni.pacifista.util.FileUtil;
 import org.ukiuni.pacifista.util.HttpUtil;
 import org.ukiuni.pacifista.util.HttpUtil.HttpMethod;
@@ -38,7 +37,7 @@ public class Local {
 	 * @param path
 	 */
 	public void mkdir(String path) {
-		new File(baseDir, path).mkdirs();
+		FileUtil.pathToFile(baseDir, path).mkdirs();
 	}
 
 	/**
@@ -53,7 +52,7 @@ public class Local {
 	}
 
 	public void save(String filePath, String value, String encode) throws IOException {
-		File file = new File(baseDir, filePath);
+		File file = FileUtil.pathToFile(baseDir, filePath);
 		file.getParentFile().mkdirs();
 		FileOutputStream out = new FileOutputStream(file);
 		out.write(value.getBytes(encode));
@@ -68,8 +67,8 @@ public class Local {
 	 * @throws IOException
 	 */
 	public void copy(String fromFilePath, String toFilePath) throws IOException {
-		File fromFile = new File(baseDir, fromFilePath);
-		File toFile = new File(baseDir, toFilePath);
+		File fromFile = FileUtil.pathToFile(baseDir, fromFilePath);
+		File toFile = FileUtil.pathToFile(baseDir, toFilePath);
 		toFile.getParentFile().mkdirs();
 		FileInputStream in = new FileInputStream(fromFile);
 		FileOutputStream out = new FileOutputStream(toFile);
@@ -84,7 +83,7 @@ public class Local {
 	 * @param filePath
 	 */
 	public void remove(String filePath) {
-		File file = new File(baseDir, filePath);
+		File file = FileUtil.pathToFile(baseDir, filePath);
 		remove(file);
 	}
 
@@ -125,7 +124,7 @@ public class Local {
 	 * @throws IOException
 	 */
 	public String load(String filePath, String encode) throws IOException {
-		File file = new File(baseDir, filePath);
+		File file = FileUtil.pathToFile(baseDir, filePath);
 		byte[] buffer = new byte[(int) file.length()];
 		FileInputStream in = new FileInputStream(file);
 		in.read(buffer);
@@ -217,9 +216,9 @@ public class Local {
 	 * @param fileName
 	 * @return absolute file path or null when not find.
 	 */
-	public static String find(String path, String fileName) {
+	public String find(String path, String fileName) {
 		try {
-			return find(new File(path), fileName);
+			return find(FileUtil.pathToFile(baseDir, path), fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

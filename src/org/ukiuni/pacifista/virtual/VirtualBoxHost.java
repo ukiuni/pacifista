@@ -13,11 +13,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.ukiuni.pacifista.Local;
 import org.ukiuni.pacifista.util.HttpUtil;
+import org.ukiuni.pacifista.util.IOUtil;
 import org.ukiuni.pacifista.util.ScriptingUtil;
 import org.ukiuni.pacifista.util.StreamUtil;
 
@@ -113,7 +115,7 @@ public class VirtualBoxHost implements VirtualHost {
 	 */
 	@Override
 	public String downloadImage(String url, String proxyHost, int proxyPort) throws IOException {
-		return downloadImage(url, null, 0, null, null);
+		return downloadImage(url, proxyHost, proxyPort, null, null);
 	}
 
 	/*
@@ -133,11 +135,19 @@ public class VirtualBoxHost implements VirtualHost {
 		HttpUtil.download(url, out, proxyHost, proxyPort, proxyUser, proxyPass);
 		out.close();
 		if (vmFile.getName().endsWith(".box")) {
-			TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(vmFile));
+			TarArchiveInputStream tarIn = null;
+			TarArchiveEntry entry;
+			try {
+				tarIn = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(vmFile)));
+				entry = tarIn.getNextTarEntry();
+			} catch (IOException e) {
+				IOUtil.close(tarIn);
+				tarIn = new TarArchiveInputStream(new FileInputStream(vmFile));
+				entry = tarIn.getNextTarEntry();
+			}
 			File tarDir = new File(vmdir, vmFileName.substring(0, vmFileName.length() - 4));
 			tarDir.mkdirs();
 			File returnFile = null;
-			TarArchiveEntry entry = tarIn.getNextTarEntry();
 			while (null != entry) {
 				long leftSize = entry.getSize();
 				byte[] buffer = new byte[READ_BUFFER_SIZE];

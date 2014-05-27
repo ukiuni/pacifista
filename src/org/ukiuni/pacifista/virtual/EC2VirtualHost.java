@@ -155,7 +155,7 @@ public class EC2VirtualHost implements VirtualHost {
 		}
 		String instanceType = "t1.micro";
 		if (parameterMap.containsKey("instanceType")) {
-			imageId = parameterMap.get("instanceType");
+			instanceType = parameterMap.get("instanceType");
 		}
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 		runInstancesRequest.withImageId(imageId).withInstanceType(instanceType).withMinCount(1).withMaxCount(1).withKeyName(keyName).withSecurityGroups(securityGroupName);

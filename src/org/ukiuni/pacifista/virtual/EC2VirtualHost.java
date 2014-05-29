@@ -129,8 +129,11 @@ public class EC2VirtualHost implements VirtualHost {
 		if (null != parameterMap.get("sshAccessibleIpRange")) {
 			ipRange = parameterMap.get("sshAccessibleIpRange");
 		}
-		openPort("tcp", 22, ipRange);
-
+		try {
+			openPort("tcp", 22, ipRange);
+		} catch (Exception e) {
+			// when duplicate. ignore.
+		}
 		File keyFile = null;
 		String keyName;
 		if (parameterMap.containsKey("keyName")) {

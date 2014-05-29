@@ -152,7 +152,7 @@ public class EC2VirtualHost implements VirtualHost {
 			out.write(privateKey.getBytes());
 			out.close();
 		}
-		String imageId = "ami-05355a6c";
+		String imageId = "ami-fb8e9292";
 		if (parameterMap.containsKey("imageId")) {
 			imageId = parameterMap.get("imageId");
 		}

@@ -219,7 +219,7 @@ public class Remote {
 	}
 
 	public void sendFile(String filePath, String remotePath, String remoteFileName) throws IOException {
-		File file = new File(baseDir, filePath);
+		File file = FileUtil.pathToFile(baseDir, filePath);
 		FileInputStream fileIn = null;
 		try {
 			fileIn = new FileInputStream(file);
@@ -450,7 +450,7 @@ public class Remote {
 
 	public class Shell {
 		private final ChannelShell channel;
-		private final InputStream in;
+		private final LinkedListInputStream in;
 		private final OutputStream out;
 		private String encode = "UTF-8";
 		private String lang = "ja_JP.UTF-8";
@@ -475,6 +475,9 @@ public class Remote {
 			} catch (JSchException e) {
 				throw new IOException(e);
 			}
+		}
+		public void setReadWaitTime(int readWaitTime){
+			this.in.setReadTimeout(readWaitTime);
 		}
 
 		public void call(String command) throws IOException {

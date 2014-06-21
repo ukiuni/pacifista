@@ -24,6 +24,7 @@ import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateName;
 import com.amazonaws.services.ec2.model.IpPermission;
@@ -162,6 +163,15 @@ public class EC2VirtualHost implements VirtualHost {
 		}
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 		runInstancesRequest.withImageId(imageId).withInstanceType(instanceType).withMinCount(1).withMaxCount(1).withKeyName(keyName).withSecurityGroups(securityGroupName);
+
+		if (parameterMap.containsKey("iamName")) {
+			runInstancesRequest.setIamInstanceProfile(new IamInstanceProfileSpecification().withName(parameterMap.get("iamName")));
+		}
+
+		if (parameterMap.containsKey("subnetId")) {
+			runInstancesRequest.setSubnetId(parameterMap.get("subnetId"));
+		}
+
 		RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
 
 		this.instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();

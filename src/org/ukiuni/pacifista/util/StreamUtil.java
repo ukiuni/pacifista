@@ -50,6 +50,10 @@ public class StreamUtil {
 			this.readTimeout = readTimeout;
 		}
 
+		public void setReadTimeout(int readTimeout) {
+			this.readTimeout = readTimeout;
+		}
+
 		@Override
 		public void close() throws IOException {
 			synchronized (outToIn) {
